@@ -1,0 +1,9 @@
+{
+  "name": "mapcrush",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/worker.test.mjs",
+    "check": "node --check worker.js && node --check public/js/script.js"
+  }
+}

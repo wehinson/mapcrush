@@ -10,11 +10,19 @@ The current data was generated from `countries_with_summaries_v2.xlsx`.
 
 ## Online Passcodes
 
-Progress is saved online through a Cloudflare Pages Function backed by Cloudflare KV. Partner mode uses one shared six-digit passcode with separate named rankings, loved countries, comments, and donation-link preferences for each person.
+Progress is saved online through a Cloudflare Worker. Each ranking uses a Durable Object so both partners can save at the same time without replacing each other's work. Existing KV sessions move to the new format automatically when they are opened.
 
 The browser no longer uses localStorage or cookies as the save system. If the Cloudflare API is not deployed yet, the app can load visually but passcodes cannot create, save, or restore sessions.
 
 Passcodes are six digits only, such as `482913`.
+
+## Partner Synchronization
+
+Each partner profile is saved separately. Both partners can rank at the same time without replacing each other's profile data. Open browsers receive update notices automatically and also check for updates every five seconds.
+
+If the same profile is changed on two devices, MapCrush stops the stale save and asks which saved version to keep. It does not silently replace the newer profile.
+
+Use **Export data** in the session controls to download the complete synchronized ranking as JSON. If the server is unavailable, MapCrush downloads a clearly marked local copy instead.
 
 ## Cloudflare Workers Setup
 
@@ -22,7 +30,7 @@ This app is configured as a Cloudflare Worker with static assets. Use a **Worker
 
 1. In Cloudflare, create a new Worker from this folder/repo with Workers Builds.
 2. Create a KV namespace in Cloudflare named something like `country-ranker-sessions`.
-3. The included `wrangler.jsonc` declares the `KV_BINDING` namespace ID and static assets.
+3. The included `wrangler.jsonc` declares the existing `KV_BINDING`, a SQLite-backed `SessionCoordinator` Durable Object, and the `public` static asset directory.
 4. Use `npx wrangler deploy` as the deploy command.
 5. Open the deployed site, create a ranking, copy the six-digit passcode, then load that same passcode from another browser/device.
 
@@ -44,9 +52,11 @@ Root directory:
 
 For local Cloudflare testing, install Wrangler and run `npx wrangler dev`. Opening the plain `index.html` file directly will not have the Cloudflare KV API.
 
+Run `npm test` before deployment. The tests cover simultaneous partner saves, stale-save protection, duplicate updates, shared removals, KV migration, and export.
+
 ## Country Data Format
 
-The permanent place to update content is `js/country-data.js`:
+The permanent place to update content is `public/js/country-data.js`:
 
 ```json
 [

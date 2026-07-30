@@ -1,0 +1,9 @@
+*
+!index.html
+!styles.css
+!favicon.png
+!_headers
+!js/
+!js/**
+!img/
+!img/**
