@@ -1,0 +1,889 @@
+<title>The Ant Power Rankings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  :root {
+    --paper:  #E7E8E1;
+    --card:   #F4F4EF;
+    --ink:    #17150F;
+    --muted:  #625F52;
+    --rule:   #C7C8BC;
+    --accent: #8A7508;
+    --spark:  #C9AC12;
+    --flag:   #8E2B12;
+    --shadow: rgba(23,21,15,.07);
+
+    --display: "Instrument Serif", Georgia, "Times New Roman", serif;
+    --body: "Spectral", Georgia, serif;
+    --util: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:  #14130E;
+      --card:   #1C1A14;
+      --ink:    #EAE7DA;
+      --muted:  #918C77;
+      --rule:   #322F23;
+      --accent: #CDB02B;
+      --spark:  #D8BC2E;
+      --flag:   #D4674C;
+      --shadow: rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:  #14130E;
+    --card:   #1C1A14;
+    --ink:    #EAE7DA;
+    --muted:  #918C77;
+    --rule:   #322F23;
+    --accent: #CDB02B;
+    --spark:  #D8BC2E;
+    --flag:   #D4674C;
+    --shadow: rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 49rem;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.1rem, 4vw, 2rem) 5rem;
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 1.15rem; }
+
+  .eyebrow {
+    font-family: var(--util);
+    font-size: .69rem;
+    font-weight: 500;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(3rem, 10vw, 5.4rem);
+    line-height: .93;
+    letter-spacing: -.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .standfirst {
+    font-size: 1.14rem;
+    color: var(--muted);
+    margin: 0;
+    max-width: 34em;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2.4rem;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 1rem 0;
+    margin-top: .5rem;
+  }
+  .fact { display: flex; flex-direction: column; gap: .1rem; }
+  .fact b {
+    font-family: var(--display);
+    font-size: 1.85rem;
+    font-weight: 400;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .fact span {
+    font-family: var(--util);
+    font-size: .66rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .method {
+    font-size: .96rem;
+    color: var(--muted);
+    max-width: 38em;
+    margin: 0;
+  }
+  .method strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- index ---------- */
+  .index {
+    margin: 2.9rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+  }
+  .index-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-family: var(--util);
+    font-size: .66rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.35rem, 1fr));
+    gap: .3rem;
+  }
+  .chip {
+    font-family: var(--util);
+    font-size: .8rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    padding: .42rem 0;
+    border: 1px solid var(--rule);
+    background: var(--card);
+    color: var(--muted);
+    text-decoration: none;
+    transition: background .14s ease, color .14s ease, border-color .14s ease;
+  }
+  .chip:hover, .chip:focus-visible {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .chip.w { color: var(--flag); border-color: color-mix(in srgb, var(--flag) 42%, var(--rule)); }
+  .chip.w:hover, .chip.w:focus-visible { background: var(--flag); border-color: var(--flag); color: var(--paper); }
+
+  /* ---------- tiers ---------- */
+  .tier { margin-top: 3.6rem; }
+  .tier-head {
+    display: flex;
+    align-items: baseline;
+    gap: .9rem;
+    padding-bottom: .55rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .tier-mark {
+    font-family: var(--display);
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .tier-name {
+    font-family: var(--util);
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+  }
+  .tier-range {
+    margin-left: auto;
+    font-family: var(--util);
+    font-size: .72rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .tier-note {
+    font-size: .95rem;
+    color: var(--muted);
+    margin: .7rem 0 0;
+    max-width: 36em;
+  }
+
+  /* ---------- entries ---------- */
+  .entry {
+    display: grid;
+    grid-template-columns: 8.6rem 1fr;
+    column-gap: 1.4rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--rule);
+    scroll-margin-top: 1.5rem;
+  }
+  .entry:last-child { border-bottom: none; }
+
+  .gutter { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+
+  .plate {
+    margin: 0;
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    padding: .3rem .25rem .2rem;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+  }
+  .plate.fossil { background: color-mix(in srgb, var(--spark) 13%, var(--card)); }
+  .mm {
+    font-family: var(--util);
+    font-size: .54rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  .ant { display: block; width: 100%; height: auto; }
+  .ant .ln, .ant .hl {
+    stroke: var(--ink);
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .ant .ln { fill: var(--card); }
+  .ant .hl { fill: var(--spark); }
+  .ant .thin { fill: none; stroke-width: 1.7; }
+  .ant .hl.thin { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .ant .blade { fill: none; stroke-width: 2.6; }
+  .ant .hl.blade { stroke: var(--accent); }
+  .ant .scape { fill: none; stroke-width: 2.2; }
+  .ant .hair { fill: none; stroke: var(--ink); stroke-width: 1.1; opacity: .75; }
+  .ant .far-l { fill: none; stroke: var(--ink); stroke-width: 1.5; opacity: .28; }
+  .ant .eye, .ant .joint { fill: var(--ink); stroke: none; }
+  .ant .soft { opacity: .55; }
+
+  .rank {
+    font-family: var(--display);
+    font-size: 2.1rem;
+    line-height: .95;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    text-align: center;
+  }
+  .entry.wild .rank { color: var(--flag); }
+
+  .entry h3 {
+    font-family: var(--body);
+    font-size: 1.16rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0 0 .12rem;
+    text-wrap: balance;
+  }
+  .sci { font-style: italic; font-weight: 400; color: var(--muted); }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    font-family: var(--util);
+    font-size: .65rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .55rem;
+  }
+  .star {
+    color: var(--flag);
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  .entry p { margin: 0; }
+
+  /* ---------- footer ---------- */
+  .endnotes {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+  .note {
+    background: var(--card);
+    border-left: 2px solid var(--rule);
+    padding: 1.15rem 1.3rem;
+    font-size: .95rem;
+    color: var(--muted);
+  }
+  .note h4 {
+    font-family: var(--util);
+    font-size: .67rem;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0 0 .5rem;
+  }
+  .note p { margin: 0; }
+  .note em { color: var(--ink); }
+
+  .colophon {
+    font-family: var(--util);
+    font-size: .68rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 2.5rem;
+    line-height: 1.9;
+  }
+
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--spark); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  @media (max-width: 32rem) {
+    body { font-size: 16px; }
+    .entry { grid-template-columns: 5.6rem 1fr; column-gap: .9rem; }
+    .rank { font-size: 1.65rem; }
+    .mm { font-size: .45rem; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Fifty ants · ranked by force</div>
+    <h1>The Ant<br>Power <em>Rankings</em></h1>
+    <p class="standfirst">The fifty best-known ants on Earth, ordered roughly by what they can actually do — weaponry, colony scale, and the ability to outlast whatever is trying to kill them.</p>
+
+    <div class="facts">
+      <div class="fact"><b>6</b><span>Continents swept</span></div>
+      <div class="fact"><b>95</b><span>Candidates</span></div>
+      <div class="fact"><b>30</b><span>Wildcards proposed</span></div>
+      <div class="fact"><b>15</b><span>Wildcards promoted</span></div>
+    </div>
+
+    <p class="method">Six researchers each took one continent, screening for genuine fame, cultural weight, and variety of type. Their candidates were deduped into a base fifty. Each researcher then named five wildcards that had missed the cut — <strong>fifteen of those thirty were promoted</strong>, chosen to fill what the base list lacked: no fossil ants, no workerless social parasites, no armor or camouflage specialists, nothing famous purely for cuisine or medicine. They displaced fifteen incumbents.</p>
+
+    <p class="method">Each entry carries a schematic lateral plate, drawn to that ant's own diagnostic anatomy — head and mandible form, eye size (blind ants have none), waist nodes, gaster shape, spines, sting or acidopore, leg length. <strong>The accent marks the feature the ant is known for</strong>: the trap-jaw's gape, the honeypot's swollen replete, the hell ant's scythe and horn. They are illustrations, not photographs, and the amber-washed plates are the two extinct species.</p>
+
+    <p class="method">Ranking weighs individual weaponry, colony scale and tactics, and resilience together. Colony-scale force beats personal armament at the top. An ant that cannot survive without a host sits at the bottom no matter how fascinating it is.</p>
+  </header>
+
+  <nav class="index" aria-label="Jump to a rank">
+    <div class="index-head">
+      <span>Index</span>
+      <span style="color:var(--flag)">Red = wildcard</span>
+    </div>
+    <div class="chips">
+      <a class="chip" href="#a1">1</a><a class="chip" href="#a2">2</a><a class="chip" href="#a3">3</a><a class="chip" href="#a4">4</a><a class="chip w" href="#a5">5</a>
+      <a class="chip" href="#a6">6</a><a class="chip" href="#a7">7</a><a class="chip" href="#a8">8</a><a class="chip" href="#a9">9</a><a class="chip" href="#a10">10</a>
+      <a class="chip" href="#a11">11</a><a class="chip" href="#a12">12</a><a class="chip" href="#a13">13</a><a class="chip" href="#a14">14</a><a class="chip" href="#a15">15</a>
+      <a class="chip" href="#a16">16</a><a class="chip" href="#a17">17</a><a class="chip w" href="#a18">18</a><a class="chip" href="#a19">19</a><a class="chip w" href="#a20">20</a>
+      <a class="chip" href="#a21">21</a><a class="chip" href="#a22">22</a><a class="chip" href="#a23">23</a><a class="chip" href="#a24">24</a><a class="chip" href="#a25">25</a>
+      <a class="chip w" href="#a26">26</a><a class="chip" href="#a27">27</a><a class="chip" href="#a28">28</a><a class="chip w" href="#a29">29</a><a class="chip w" href="#a30">30</a>
+      <a class="chip" href="#a31">31</a><a class="chip" href="#a32">32</a><a class="chip" href="#a33">33</a><a class="chip" href="#a34">34</a><a class="chip w" href="#a35">35</a>
+      <a class="chip" href="#a36">36</a><a class="chip" href="#a37">37</a><a class="chip w" href="#a38">38</a><a class="chip" href="#a39">39</a><a class="chip w" href="#a40">40</a>
+      <a class="chip" href="#a41">41</a><a class="chip" href="#a42">42</a><a class="chip w" href="#a43">43</a><a class="chip w" href="#a44">44</a><a class="chip w" href="#a45">45</a>
+      <a class="chip" href="#a46">46</a><a class="chip" href="#a47">47</a><a class="chip w" href="#a48">48</a><a class="chip w" href="#a49">49</a><a class="chip w" href="#a50">50</a>
+    </div>
+  </nav>
+
+  <!-- ============ S TIER ============ -->
+  <section class="tier">
+    <div class="tier-head">
+      <span class="tier-mark">S</span>
+      <span class="tier-name">The colony is the weapon</span>
+      <span class="tier-range">01–05</span>
+    </div>
+    <p class="tier-note">Nothing here wins with a sting. These five win by putting more coordinated force in one place than anything else in the family can muster.</p>
+
+    <article class="entry" id="a1">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-11.0 9 108.4 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,30.0 31.7,37.0 24.7,46.5 20.7,49.9"/><polyline class="far-l" points="50.3,30.0 47.3,40.0 44.3,51.2 40.8,54.6"/><polyline class="far-l" points="58.7,30.0 67.7,38.0 74.7,48.3 79.7,51.8"/></g><line class="ln scape" x1="21.0" y1="22.2" x2="7.5" y2="11.7"/><line class="ln thin" x1="7.5" y1="11.7" x2="-5.0" y2="15.2"/><circle class="joint" cx="7.5" cy="11.7" r="1.1"/><ellipse class="ln" cx="78.2" cy="27.0" rx="12.2" ry="9.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 38.0 29.5 L 38.0 24.8 Q 41.4 18.5 46.0 20.1 Q 48.9 24.2 51.2 23.2 Q 55.2 21.4 59.0 24.4 L 59.0 31.0 Q 47.5 34.4 38.0 29.5 Z"/><ellipse class="ln" cx="26.8" cy="27.0" rx="9.7" ry="8.5"/><path class="ln thin" fill="none" d="M 33.4 21.9 Q 29.9 27.0 33.4 32.1"/><path class="hl blade" d="M 18.6 26.7 Q 8.5 21.9 5.6 31.3"/><path class="hl blade" d="M 18.6 32.7 Q 8.5 37.5 5.6 28.1"/><polyline class="ln thin" points="41.5,31.5 29.5,38.5 22.5,49.5 18.5,53.5"/><polyline class="ln thin" points="48.1,31.5 45.1,41.5 42.1,54.5 38.6,58.5"/><polyline class="ln thin" points="56.5,31.5 65.5,39.5 72.5,51.5 77.5,55.5"/></svg><figcaption class="mm">13 mm soldier</figcaption></figure><div class="rank">1</div></div>
+      <div>
+        <h3>Driver ant, siafu <span class="sci">Dorylus spp.</span></h3>
+        <div class="tags"><span>Africa</span></div>
+        <p>Colonies past 20 million, with a queen laying millions of eggs a month — the highest rate of any insect. Blind columns swarm, dismantle, and dismember anything too slow to leave, including small vertebrates. Maasai and others have used the soldiers' locked mandibles as emergency sutures: let it bite the wound shut, then snap the body off. The most force any ant can bring to bear.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a2">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-12.3 9 107.8 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="39.7,29.5 27.7,36.5 20.7,46.0 16.7,49.4"/><polyline class="far-l" points="46.3,29.5 43.3,39.5 40.3,50.7 36.8,54.1"/><polyline class="far-l" points="54.7,29.5 63.7,37.5 70.7,47.8 75.7,51.3"/></g><line class="ln scape" x1="19.7" y1="22.9" x2="6.2" y2="12.4"/><line class="ln thin" x1="6.2" y1="12.4" x2="-6.3" y2="15.9"/><circle class="joint" cx="6.2" cy="12.4" r="1.1"/><ellipse class="ln" cx="77.3" cy="27.0" rx="11.3" ry="8.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 34.0 29.5 L 34.0 25.0 Q 37.4 19.0 42.0 20.6 Q 44.9 24.7 47.2 23.7 Q 51.2 21.9 55.0 24.9 L 55.0 30.5 Q 43.5 33.9 34.0 29.5 Z"/><ellipse class="ln" cx="24.5" cy="27.0" rx="8.0" ry="7.4"/><path class="hl blade" d="M 18.0 26.4 Q 7.1 21.0 4.0 31.0"/><path class="hl blade" d="M 18.0 32.4 Q 7.1 37.8 4.0 27.8"/><polyline class="ln thin" points="37.5,31.0 25.5,38.0 18.5,49.0 14.5,53.0"/><polyline class="ln thin" points="44.1,31.0 41.1,41.0 38.1,54.0 34.6,58.0"/><polyline class="ln thin" points="52.5,31.0 61.5,39.0 68.5,51.0 73.5,55.0"/></svg><figcaption class="mm">12 mm soldier</figcaption></figure><div class="rank">2</div></div>
+      <div>
+        <h3>Army ant <span class="sci">Eciton burchellii</span></h3>
+        <div class="tags"><span>Amazonia to Mexico</span></div>
+        <p>Up to two million workers and no permanent nest — the colony builds its own shelter out of linked living bodies. Raids push 200,000 ants across a thousand-square-metre front daily, trailed by birds that have made a profession of following them. Saber-jawed soldiers, but blind and fatally trail-dependent: a closed loop becomes a death-spiral "ant mill."</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a3">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-4.6 9 100.4 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,28.5 31.7,35.5 24.7,45.0 20.7,48.4"/><polyline class="far-l" points="48.4,28.5 45.4,38.5 42.4,49.7 38.9,53.1"/><polyline class="far-l" points="54.7,28.5 63.7,36.5 70.7,46.8 75.7,50.3"/></g><line class="ln scape" x1="27.4" y1="24.0" x2="13.9" y2="13.5"/><line class="ln thin" x1="13.9" y1="13.5" x2="1.4" y2="17.0"/><circle class="joint" cx="13.9" cy="13.5" r="1.1"/><ellipse class="hl" cx="75.4" cy="27.0" rx="9.4" ry="8.0"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 38.0 29.5 L 38.0 25.4 Q 40.7 20.0 44.5 21.6 Q 46.8 25.7 48.7 24.7 Q 51.9 22.9 55.0 25.9 L 55.0 29.5 Q 45.6 32.9 38.0 29.5 Z"/><ellipse class="ln" cx="30.8" cy="27.0" rx="5.7" ry="5.4"/><ellipse class="eye" cx="31.5" cy="25.6" rx="1.2" ry="1.5"/><path class="ln" d="M 26.6 26.1 Q 22.8 28.3 21.6 30.8 Q 24.5 29.3 26.6 31.1 Z"/><line class="ln hair" x1="24.5" y1="29.4" x2="23.9" y2="31.8"/><line class="ln hair" x1="23.3" y1="29.7" x2="22.7" y2="32.1"/><polyline class="ln thin" points="41.5,30.0 29.5,37.0 22.5,48.0 18.5,52.0"/><polyline class="ln thin" points="46.2,30.0 43.2,40.0 40.2,53.0 36.7,57.0"/><polyline class="ln thin" points="52.5,30.0 61.5,38.0 68.5,50.0 73.5,54.0"/></svg><figcaption class="mm">2–6 mm</figcaption></figure><div class="rank">3</div></div>
+      <div>
+        <h3>Red imported fire ant <span class="sci">Solenopsis invicta</span></h3>
+        <div class="tags"><span>South America → global</span></div>
+        <p>The most complete package in the family: alkaloid venom, coordinated swarm-stinging, colonies past 100,000, and the ability to survive floods by linking into a living raft with the queen at the centre. It has taken four continents. Australia has spent more than A$1.2 billion trying to stop it.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a4">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-18.6 9 111.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="40.7,30.0 28.7,37.0 21.7,46.5 17.7,49.9"/><polyline class="far-l" points="46.8,30.0 43.8,40.0 40.8,51.2 37.3,54.6"/><polyline class="far-l" points="54.7,30.0 63.7,38.0 70.7,48.3 75.7,51.8"/></g><line class="ln scape" x1="13.4" y1="20.9" x2="-0.1" y2="10.4"/><line class="ln thin" x1="-0.1" y1="10.4" x2="-12.6" y2="13.9"/><circle class="joint" cx="-0.1" cy="10.4" r="1.1"/><ellipse class="ln" cx="75.9" cy="27.0" rx="9.9" ry="8.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 35.0 29.5 L 35.0 24.8 Q 38.2 18.5 42.6 20.1 Q 45.4 24.2 47.6 23.2 Q 51.4 21.4 55.0 24.4 L 55.0 31.0 Q 44.0 34.4 35.0 29.5 Z"/><polyline class="hl" points="51.5,21.5 54.0,13.5 55.1,21.2"/><polyline class="hl" points="47.0,21.5 49.5,13.5 50.6,21.2"/><polyline class="hl" points="55.6,22.6 57.0,17.5 58.4,22.6"/><ellipse class="hl" cx="21.0" cy="27.0" rx="12.5" ry="10.8"/><path class="ln thin" fill="none" d="M 29.5 20.5 Q 25.0 27.0 29.5 33.5"/><ellipse class="eye" cx="22.5" cy="24.2" rx="1.5" ry="1.9"/><path class="ln" d="M 9.9 26.3 Q 1.4 23.3 -0.1 29.5 Q 5.4 30.1 9.9 29.7 Z"/><path class="ln" d="M 9.9 34.7 Q 1.4 37.7 -0.1 31.5 Q 5.4 30.9 9.9 31.3 Z"/><polyline class="ln thin" points="38.5,31.5 26.5,38.5 19.5,49.5 15.5,53.5"/><polyline class="ln thin" points="44.6,31.5 41.6,41.5 38.6,54.5 35.1,58.5"/><polyline class="ln thin" points="52.5,31.5 61.5,39.5 68.5,51.5 73.5,55.5"/></svg><figcaption class="mm">up to 16 mm</figcaption></figure><div class="rank">4</div></div>
+      <div>
+        <h3>Leafcutter ant <span class="sci">Atta &amp; Acromyrmex</span></h3>
+        <div class="tags"><span>Neotropics</span></div>
+        <p>Eight million workers running underground fungus farms, defended by antibiotic bacteria cultured on their own bodies. Soldier mandibles cut through leather; queens live twenty years. The New World's dominant herbivore by biomass — nineteenth-century Brazil had a saying that either Brazil ends the ants, or the ants end Brazil.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a5">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-5.4 9 103.1 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="44.7,29.0 32.7,36.0 25.7,45.5 21.7,48.9"/><polyline class="far-l" points="50.8,29.0 47.8,39.0 44.8,50.2 41.3,53.6"/><polyline class="far-l" points="58.7,29.0 67.7,37.0 74.7,47.3 79.7,50.8"/></g><line class="ln scape" x1="26.6" y1="23.5" x2="13.1" y2="13.0"/><line class="ln thin" x1="13.1" y1="13.0" x2="0.6" y2="16.5"/><circle class="joint" cx="13.1" cy="13.0" r="1.1"/><ellipse class="ln" cx="76.3" cy="27.0" rx="10.3" ry="8.0"/><polyline class="ln" points="85.7,28.5 92.2,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 39.0 29.5 L 39.0 25.2 Q 42.2 19.5 46.6 21.1 Q 49.4 25.2 51.6 24.2 Q 55.4 22.4 59.0 25.4 L 59.0 30.0 Q 48.0 33.4 39.0 29.5 Z"/><ellipse class="ln" cx="30.7" cy="27.0" rx="6.8" ry="6.3"/><path class="ln" d="M 25.3 26.4 Q 20.1 28.6 18.3 31.9 Q 22.4 29.6 25.3 31.4 Z"/><line class="ln hair" x1="22.4" y1="29.9" x2="21.8" y2="32.3"/><line class="ln hair" x1="20.7" y1="30.4" x2="20.1" y2="32.8"/><polyline class="ln thin" points="42.5,30.5 30.5,37.5 23.5,48.5 19.5,52.5"/><polyline class="ln thin" points="48.6,30.5 45.6,40.5 42.6,53.5 39.1,57.5"/><polyline class="ln thin" points="56.5,30.5 65.5,38.5 72.5,50.5 77.5,54.5"/></svg><figcaption class="mm">~8 mm</figcaption></figure><div class="rank">5</div></div>
+      <div>
+        <h3>Marabunta ant <span class="sci">Labidus praedator</span></h3>
+        <div class="tags"><span>Mexico to N. Argentina</span><span class="star">★ Wildcard</span></div>
+        <p>The army ant behind the marabunta legend and the 1954 film <em>The Naked Jungle</em>. Million-plus colonies that raid above and below ground at the same time, a broader attack front than <span class="sci">Eciton</span> manages. It wins on raid density rather than on any individual weapon.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ A TIER ============ -->
+  <section class="tier">
+    <div class="tier-head">
+      <span class="tier-mark">A</span>
+      <span class="tier-name">Empire builders &amp; elite killers</span>
+      <span class="tier-range">06–20</span>
+    </div>
+    <p class="tier-note">Continental conquerors and the ants that hold records for pain, venom, and size. Below this line, force gives way to specialization.</p>
+
+    <article class="entry" id="a6">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-18.4 9 114.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="42.7,29.5 30.7,36.5 23.7,46.0 19.7,49.4"/><polyline class="far-l" points="47.8,29.5 44.8,39.5 41.8,50.7 38.3,54.1"/><polyline class="far-l" points="54.7,29.5 63.7,37.5 70.7,47.8 75.7,51.3"/></g><line class="ln scape" x1="13.6" y1="20.3" x2="0.1" y2="9.8"/><line class="ln thin" x1="0.1" y1="9.8" x2="-12.4" y2="13.3"/><circle class="joint" cx="0.1" cy="9.8" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="8.0"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 37.0 29.5 L 37.0 25.0 Q 39.9 19.0 43.8 20.6 Q 46.4 24.7 48.3 23.7 Q 51.8 21.9 55.0 24.9 L 55.0 30.5 Q 45.1 33.9 37.0 29.5 Z"/><ellipse class="hl" cx="21.8" cy="27.0" rx="13.7" ry="12.0"/><path class="ln thin" fill="none" d="M 31.1 19.8 Q 26.2 27.0 31.1 34.2"/><ellipse class="eye" cx="23.5" cy="23.9" rx="1.0" ry="1.2"/><path class="ln" d="M 9.6 26.6 Q 2.0 24.4 0.6 29.8 Q 5.6 30.4 9.6 30.0 Z"/><path class="ln" d="M 9.6 35.0 Q 2.0 37.3 0.6 31.8 Q 5.6 31.2 9.6 31.6 Z"/><polyline class="ln thin" points="40.5,31.0 28.5,38.0 21.5,49.0 17.5,53.0"/><polyline class="ln thin" points="45.6,31.0 42.6,41.0 39.6,54.0 36.1,58.0"/><polyline class="ln thin" points="52.5,31.0 61.5,39.0 68.5,51.0 73.5,55.0"/></svg><figcaption class="mm">16 mm major</figcaption></figure><div class="rank">6</div></div>
+      <div>
+        <h3>Marauder ant <span class="sci">Carebara diversa</span></h3>
+        <div class="tags"><span>India, SE Asia</span></div>
+        <p>The most extreme worker polymorphism known — the largest major outweighs the smallest minor by roughly 550 times, and minors ride on majors' backs during trail marches to save energy. Colonies in the hundreds of thousands stage nocturnal raids that gut other colonies outright.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a7">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-8.5 9 102.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="40.7,28.5 24.5,38.0 15.0,50.7 9.6,55.4"/><polyline class="far-l" points="48.7,28.5 44.7,42.0 40.6,57.1 35.9,61.7"/><polyline class="far-l" points="58.7,28.5 70.9,39.3 80.3,53.2 87.1,57.9"/></g><line class="ln scape" x1="23.5" y1="23.8" x2="10.0" y2="13.3"/><line class="ln thin" x1="10.0" y1="13.3" x2="-2.5" y2="16.8"/><circle class="joint" cx="10.0" cy="13.3" r="1.1"/><ellipse class="ln" cx="76.3" cy="27.0" rx="10.3" ry="7.5"/><circle class="ln" cx="87.9" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 35.0 29.5 L 35.0 25.4 Q 38.8 20.0 44.1 21.6 Q 47.5 25.7 50.1 24.7 Q 54.7 22.9 59.0 25.9 L 59.0 29.5 Q 45.8 32.9 35.0 29.5 Z"/><ellipse class="ln" cx="27.2" cy="27.0" rx="6.3" ry="5.7"/><ellipse class="eye" cx="28.0" cy="25.5" rx="2.4" ry="3.0"/><path class="ln" d="M 22.5 26.2 Q 18.0 28.4 16.5 31.3 Q 19.9 29.4 22.5 31.2 Z"/><line class="ln hair" x1="19.9" y1="29.6" x2="19.3" y2="32.0"/><line class="ln hair" x1="18.5" y1="30.0" x2="17.9" y2="32.4"/><polyline class="ln thin" points="38.5,30.0 22.3,39.5 12.8,54.3 7.4,59.7"/><polyline class="ln thin" points="46.5,30.0 42.5,43.5 38.4,61.0 33.7,66.5"/><polyline class="ln thin" points="56.5,30.0 68.7,40.8 78.1,57.0 84.9,62.4"/></svg><figcaption class="mm">8–10 mm</figcaption></figure><div class="rank">7</div></div>
+      <div>
+        <h3>Weaver ant <span class="sci">Oecophylla smaragdina &amp; longinoda</span></h3>
+        <div class="tags"><span>Africa · Asia · N. Australia</span></div>
+        <p>Half a million workers spanning many trees, sewing leaf nests shut using their own larvae as living glue guns. They bite, then curl the abdomen to squirt formic acid into the wound. Hyper-territorial canopy warlords, deployed as orchard biocontrol in China for over 1,700 years — the oldest recorded pest control of any kind.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a8">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-15.5 9 110.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="44.7,29.0 32.7,36.0 25.7,45.5 21.7,48.9"/><polyline class="far-l" points="48.9,29.0 45.9,39.0 42.9,50.2 39.4,53.6"/><polyline class="far-l" points="54.7,29.0 63.7,37.0 70.7,47.3 75.7,50.8"/></g><line class="ln scape" x1="16.5" y1="20.6" x2="3.0" y2="10.1"/><line class="ln thin" x1="3.0" y1="10.1" x2="-9.5" y2="13.6"/><circle class="joint" cx="3.0" cy="10.1" r="1.1"/><ellipse class="ln" cx="74.9" cy="27.0" rx="8.9" ry="8.0"/><polyline class="ln" points="82.9,28.5 89.4,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 39.0 29.5 L 39.0 25.2 Q 41.6 19.5 45.1 21.1 Q 47.3 25.2 49.1 24.2 Q 52.1 22.4 55.0 25.4 L 55.0 30.0 Q 46.2 33.4 39.0 29.5 Z"/><ellipse class="hl" cx="24.4" cy="27.0" rx="13.1" ry="11.4"/><path class="ln thin" fill="none" d="M 33.3 20.2 Q 28.6 27.0 33.3 33.8"/><ellipse class="eye" cx="26.0" cy="24.0" rx="1.1" ry="1.4"/><path class="ln" d="M 12.8 26.4 Q 6.0 24.9 4.8 29.6 Q 9.2 30.2 12.8 29.8 Z"/><path class="ln" d="M 12.8 34.8 Q 6.0 36.4 4.8 31.6 Q 9.2 31.0 12.8 31.4 Z"/><polyline class="ln thin" points="42.5,30.5 30.5,37.5 23.5,48.5 19.5,52.5"/><polyline class="ln thin" points="46.7,30.5 43.7,40.5 40.7,53.5 37.2,57.5"/><polyline class="ln thin" points="52.5,30.5 61.5,38.5 68.5,50.5 73.5,54.5"/></svg><figcaption class="mm">3.5 mm soldier</figcaption></figure><div class="rank">8</div></div>
+      <div>
+        <h3>Big-headed ant <span class="sci">Pheidole megacephala</span></h3>
+        <div class="tags"><span>Africa → pantropical</span></div>
+        <p>On the IUCN's hundred worst invasive species, with huge-headed soldiers and unicolonial supercolonies that have locally exterminated entire native invertebrate faunas. In Kenya it displaced the acacia ants, stripped whistling-thorn trees of their bodyguards, and handed them to the elephants.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a9">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="2.3 9 88.6 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="49.7,28.0 37.7,35.0 30.7,44.5 26.7,47.9"/><polyline class="far-l" points="53.4,28.0 50.4,38.0 47.4,49.2 43.9,52.6"/><polyline class="far-l" points="58.7,28.0 67.7,36.0 74.7,46.3 79.7,49.8"/></g><line class="ln scape" x1="34.3" y1="24.3" x2="20.8" y2="13.8"/><line class="ln thin" x1="20.8" y1="13.8" x2="8.3" y2="17.3"/><circle class="joint" cx="20.8" cy="13.8" r="1.1"/><ellipse class="ln" cx="74.9" cy="27.0" rx="8.9" ry="7.0"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 44.0 29.5 L 44.0 25.6 Q 46.4 20.5 49.7 22.1 Q 51.8 26.2 53.5 25.2 Q 56.3 23.4 59.0 26.4 L 59.0 29.0 Q 50.8 32.4 44.0 29.5 Z"/><ellipse class="ln" cx="37.4" cy="27.0" rx="5.1" ry="4.8"/><ellipse class="eye" cx="38.0" cy="25.7" rx="1.4" ry="1.8"/><path class="ln" d="M 33.7 26.0 Q 30.7 28.2 29.7 30.2 Q 32.1 29.2 33.7 31.0 Z"/><polyline class="ln thin" points="47.5,29.5 35.5,36.5 28.5,47.5 24.5,51.5"/><polyline class="ln thin" points="51.2,29.5 48.2,39.5 45.2,52.5 41.7,56.5"/><polyline class="ln thin" points="56.5,29.5 65.5,37.5 72.5,49.5 77.5,53.5"/></svg><figcaption class="mm">2.6 mm</figcaption></figure><div class="rank">9</div></div>
+      <div>
+        <h3>Argentine ant <span class="sci">Linepithema humile</span></h3>
+        <div class="tags"><span>South America → global</span></div>
+        <p>Individually feeble — three millimetres, no sting. But introduced populations lost their nestmate aggression, so millions of nests now cooperate as a single unit; the Mediterranean supercolony runs over 6,000 km. One of the largest cooperative organisms ever documented, and proof that coordination outranks weaponry.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a10">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-2.2 9 94.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="45.7,28.0 27.7,38.5 17.2,52.7 11.2,57.8"/><polyline class="far-l" points="51.3,28.0 46.8,43.0 42.3,59.8 37.1,64.9"/><polyline class="far-l" points="58.7,28.0 72.2,40.0 82.7,55.5 90.2,60.6"/></g><line class="ln scape" x1="29.8" y1="24.1" x2="16.3" y2="13.6"/><line class="ln thin" x1="16.3" y1="13.6" x2="3.8" y2="17.1"/><circle class="joint" cx="16.3" cy="13.6" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="7.0"/><circle class="ln" cx="86.0" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 40.0 29.5 L 40.0 25.6 Q 43.0 20.5 47.2 22.1 Q 49.9 26.2 52.0 25.2 Q 55.6 23.4 59.0 26.4 L 59.0 29.0 Q 48.5 32.4 40.0 29.5 Z"/><ellipse class="ln" cx="33.1" cy="27.0" rx="5.4" ry="5.1"/><ellipse class="eye" cx="33.7" cy="25.7" rx="2.0" ry="2.5"/><path class="ln" d="M 29.2 26.0 Q 25.8 28.2 24.7 30.5 Q 27.3 29.2 29.2 31.0 Z"/><polyline class="ln thin" points="43.5,29.5 25.5,40.0 15.0,56.5 9.0,62.5"/><polyline class="ln thin" points="49.1,29.5 44.6,44.5 40.1,64.0 34.9,70.0"/><polyline class="ln thin" points="56.5,29.5 70.0,41.5 80.5,59.5 88.0,65.5"/></svg><figcaption class="mm">4–5 mm</figcaption></figure><div class="rank">10</div></div>
+      <div>
+        <h3>Yellow crazy ant <span class="sci">Anoplolepis gracilipes</span></h3>
+        <div class="tags"><span>Asia &amp; Pacific</span></div>
+        <p>Sprays formic acid into the eyes and joints of animals vastly larger than itself, then group-dismembers them. On Christmas Island, a supercolony covering 750 hectares killed tens of millions of red land crabs and collapsed the island's ecology.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a11">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-15.1 9 115.6 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="38.7,30.0 26.7,37.0 19.7,46.5 15.7,49.9"/><polyline class="far-l" points="45.8,30.0 42.8,40.0 39.8,51.2 36.3,54.6"/><polyline class="far-l" points="54.7,30.0 63.7,38.0 70.7,48.3 75.7,51.8"/></g><line class="ln scape" x1="16.9" y1="22.5" x2="3.4" y2="12.0"/><line class="ln thin" x1="3.4" y1="12.0" x2="-9.1" y2="15.5"/><circle class="joint" cx="3.4" cy="12.0" r="1.1"/><ellipse class="ln" cx="77.8" cy="27.0" rx="11.8" ry="10.0"/><polyline class="ln" points="88.5,28.5 95.0,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 33.0 29.5 L 33.0 24.8 Q 36.5 18.5 41.4 20.1 Q 44.4 24.2 46.9 23.2 Q 51.0 21.4 55.0 24.4 L 55.0 31.0 Q 42.9 34.4 33.0 29.5 Z"/><ellipse class="hl" cx="22.4" cy="27.0" rx="9.1" ry="8.0"/><ellipse class="eye" cx="23.5" cy="24.9" rx="4.2" ry="5.2"/><path class="ln" d="M 14.8 27.0 Q 5.0 29.2 1.8 35.0 Q 9.3 30.2 14.8 32.0 Z"/><line class="ln hair" x1="9.3" y1="31.2" x2="8.7" y2="33.6"/><line class="ln hair" x1="6.2" y1="32.1" x2="5.6" y2="34.5"/><polyline class="ln thin" points="36.5,31.5 24.5,38.5 17.5,49.5 13.5,53.5"/><polyline class="ln thin" points="43.6,31.5 40.6,41.5 37.6,54.5 34.1,58.5"/><polyline class="ln thin" points="52.5,31.5 61.5,39.5 68.5,51.5 73.5,55.5"/></svg><figcaption class="mm">up to 40 mm</figcaption></figure><div class="rank">11</div></div>
+      <div>
+        <h3>Giant bull ant <span class="sci">Myrmecia brevinoda &amp; pyriformis</span></h3>
+        <div class="tags"><span>Australia</span></div>
+        <p>Up to 40mm, with near-vertebrate-grade vision — it tracks you, then chases you several metres. Potent sting, hours of burning pain, occasional fatal anaphylaxis; Guinness has listed the genus as the world's most dangerous ant. The best one-on-one fighter here, held back only by modest colony size.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a12">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-11.2 9 112.6 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="41.7,30.0 29.7,37.0 22.7,46.5 18.7,49.9"/><polyline class="far-l" points="49.2,30.0 46.2,40.0 43.2,51.2 39.7,54.6"/><polyline class="far-l" points="58.7,30.0 67.7,38.0 74.7,48.3 79.7,51.8"/></g><line class="ln scape" x1="20.8" y1="22.7" x2="7.3" y2="12.2"/><line class="ln thin" x1="7.3" y1="12.2" x2="-5.2" y2="15.7"/><circle class="joint" cx="7.3" cy="12.2" r="1.1"/><ellipse class="hl" cx="78.2" cy="27.0" rx="12.2" ry="10.0"/><polyline class="ln" points="89.4,28.5 95.9,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 36.0 29.5 L 36.0 24.8 Q 39.7 18.5 44.7 20.1 Q 48.0 24.2 50.5 23.2 Q 54.9 21.4 59.0 24.4 L 59.0 31.0 Q 46.4 34.4 36.0 29.5 Z"/><ellipse class="ln" cx="26.0" cy="27.0" rx="8.5" ry="7.7"/><ellipse class="eye" cx="27.0" cy="25.0" rx="2.4" ry="3.0"/><path class="ln" d="M 18.9 26.9 Q 12.2 29.1 9.9 33.2 Q 15.1 30.1 18.9 31.9 Z"/><line class="ln hair" x1="15.1" y1="30.6" x2="14.5" y2="33.0"/><line class="ln hair" x1="13.0" y1="31.2" x2="12.4" y2="33.6"/><polyline class="ln thin" points="39.5,31.5 27.5,38.5 20.5,49.5 16.5,53.5"/><polyline class="ln thin" points="47.0,31.5 44.0,41.5 41.0,54.5 37.5,58.5"/><polyline class="ln thin" points="56.5,31.5 65.5,39.5 72.5,51.5 77.5,55.5"/></svg><figcaption class="mm">18–30 mm</figcaption></figure><div class="rank">12</div></div>
+      <div>
+        <h3>Bullet ant <span class="sci">Paraponera clavata</span></h3>
+        <div class="tags"><span>Amazonia to Nicaragua</span></div>
+        <p>The maximum score on the Schmidt sting pain index — 4+, described as walking over flaming charcoal with a nail in your heel, arriving in waves for a full day. The agent is poneratoxin, a sodium-channel neurotoxin. Sateré-Mawé initiates wear gloves packed with them, twenty times over.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a13">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-8.3 9 106.9 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.5 31.7,36.5 24.7,46.0 20.7,49.4"/><polyline class="far-l" points="50.3,29.5 47.3,39.5 44.3,50.7 40.8,54.1"/><polyline class="far-l" points="58.7,29.5 67.7,37.5 74.7,47.8 79.7,51.3"/></g><line class="ln scape" x1="23.7" y1="23.0" x2="10.2" y2="12.5"/><line class="ln thin" x1="10.2" y1="12.5" x2="-2.3" y2="16.0"/><circle class="joint" cx="10.2" cy="12.5" r="1.1"/><ellipse class="ln" cx="76.8" cy="27.0" rx="10.8" ry="9.0"/><polyline class="ln" points="86.6,28.5 93.1,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 38.0 29.5 L 38.0 25.0 Q 41.4 19.0 46.0 20.6 Q 48.9 24.7 51.2 23.7 Q 55.2 21.9 59.0 24.9 L 59.0 30.5 Q 47.5 33.9 38.0 29.5 Z"/><ellipse class="ln" cx="28.5" cy="27.0" rx="8.0" ry="7.1"/><ellipse class="eye" cx="29.5" cy="25.1" rx="2.0" ry="2.5"/><path class="ln" d="M 22.0 26.7 Q 16.0 28.9 14.0 32.6 Q 18.7 29.9 22.0 31.7 Z"/><line class="ln hair" x1="18.7" y1="30.3" x2="18.1" y2="32.7"/><line class="ln hair" x1="16.8" y1="30.9" x2="16.2" y2="33.3"/><polyline class="ln thin" points="41.5,31.0 29.5,38.0 22.5,49.0 18.5,53.0"/><polyline class="ln thin" points="48.1,31.0 45.1,41.0 42.1,54.0 38.6,58.0"/><polyline class="ln thin" points="56.5,31.0 65.5,39.0 72.5,51.0 77.5,55.0"/></svg><figcaption class="mm">up to 18 mm</figcaption></figure><div class="rank">13</div></div>
+      <div>
+        <h3>Matabele ant <span class="sci">Megaponera analis</span></h3>
+        <div class="tags"><span>Sub-Saharan Africa</span></div>
+        <p>The only ant genus that hunts termites exclusively, raiding in military columns of 200 to 600. Injured ants chemically call for rescue, are carried home, and have their wounds treated with antimicrobial gland secretions — survival rises from about 20% to about 90%. The only non-human animal known to run a field hospital.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a14">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-14.0 9 117.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="40.7,30.5 28.7,37.5 21.7,47.0 17.7,50.4"/><polyline class="far-l" points="48.7,30.5 45.7,40.5 42.7,51.7 39.2,55.1"/><polyline class="far-l" points="58.7,30.5 67.7,38.5 74.7,48.8 79.7,52.3"/></g><line class="ln scape" x1="18.0" y1="22.2" x2="4.5" y2="11.7"/><line class="ln thin" x1="4.5" y1="11.7" x2="-8.0" y2="15.2"/><circle class="joint" cx="4.5" cy="11.7" r="1.1"/><ellipse class="ln" cx="79.2" cy="27.0" rx="13.2" ry="10.5"/><polyline class="ln" points="91.3,28.5 97.8,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 35.0 29.5 L 35.0 24.7 Q 38.8 18.0 44.1 19.6 Q 47.5 23.7 50.1 22.7 Q 54.7 20.9 59.0 23.9 L 59.0 31.5 Q 45.8 34.9 35.0 29.5 Z"/><ellipse class="ln" cx="23.8" cy="27.0" rx="9.7" ry="8.5"/><path class="ln thin" fill="none" d="M 30.4 21.9 Q 26.9 27.0 30.4 32.1"/><ellipse class="eye" cx="25.0" cy="24.8" rx="2.6" ry="3.2"/><path class="ln" d="M 15.6 27.1 Q 7.4 29.3 4.6 34.4 Q 11.0 30.3 15.6 32.1 Z"/><line class="ln hair" x1="11.0" y1="31.1" x2="10.4" y2="33.5"/><line class="ln hair" x1="8.4" y1="31.9" x2="7.8" y2="34.3"/><polyline class="ln thin" points="38.5,32.0 26.5,39.0 19.5,50.0 15.5,54.0"/><polyline class="ln thin" points="46.5,32.0 43.5,42.0 40.5,55.0 37.0,59.0"/><polyline class="ln thin" points="56.5,32.0 65.5,40.0 72.5,52.0 77.5,56.0"/></svg><figcaption class="mm">30–40 mm</figcaption></figure><div class="rank">14</div></div>
+      <div>
+        <h3>Giant Amazonian ant <span class="sci">Dinoponera spp.</span></h3>
+        <div class="tags"><span>South America</span></div>
+        <p>The largest ant workers alive at three to four centimetres, with a sting locals rate near bullet-ant class. There is no queen caste at all: reproduction goes to whichever worker wins a ritualized antennal-boxing tournament.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a15">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-7.4 9 105.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.0 31.7,36.0 24.7,45.5 20.7,48.9"/><polyline class="far-l" points="50.3,29.0 47.3,39.0 44.3,50.2 40.8,53.6"/><polyline class="far-l" points="58.7,29.0 67.7,37.0 74.7,47.3 79.7,50.8"/></g><line class="ln scape" x1="24.6" y1="23.5" x2="11.1" y2="13.0"/><line class="ln thin" x1="11.1" y1="13.0" x2="-1.4" y2="16.5"/><circle class="joint" cx="11.1" cy="13.0" r="1.1"/><ellipse class="ln" cx="76.3" cy="27.0" rx="10.3" ry="8.5"/><polyline class="ln" points="85.7,28.5 92.2,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 38.0 29.5 L 38.0 25.2 Q 41.4 19.5 46.0 21.1 Q 48.9 25.2 51.2 24.2 Q 55.2 22.4 59.0 25.4 L 59.0 30.0 Q 47.5 33.4 38.0 29.5 Z"/><ellipse class="ln" cx="29.1" cy="27.0" rx="7.4" ry="6.3"/><ellipse class="eye" cx="30.0" cy="25.4" rx="2.8" ry="3.5"/><path class="hl" d="M 23.2 27.0 L 8.2 21.5 L 7.2 19.3 L 22.7 24.6 Z"/><line class="ln hair" x1="9.4" y1="22.1" x2="9.4" y2="19.1"/><path class="hl" d="M 23.2 31.0 L 8.2 36.5 L 7.2 38.7 L 22.7 33.4 Z"/><line class="ln hair" x1="9.4" y1="35.9" x2="9.4" y2="38.9"/><polyline class="ln thin" points="41.5,30.5 29.5,37.5 22.5,48.5 18.5,52.5"/><polyline class="ln thin" points="48.1,30.5 45.1,40.5 42.1,53.5 38.6,57.5"/><polyline class="ln thin" points="56.5,30.5 65.5,38.5 72.5,50.5 77.5,54.5"/></svg><figcaption class="mm">8–12 mm</figcaption></figure><div class="rank">15</div></div>
+      <div>
+        <h3>Trap-jaw ant <span class="sci">Odontomachus spp.</span></h3>
+        <div class="tags"><span>Americas · Asia</span></div>
+        <p>Mandibles latch at 180° and snap shut at up to 64 m/s in 0.13 milliseconds, delivering over 300 times body weight of force — and it stings as well. Fired at the ground instead, the same jaws catapult the ant clear of danger.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a16">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-10.4 9 108.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="40.7,29.5 28.7,36.5 21.7,46.0 17.7,49.4"/><polyline class="far-l" points="46.8,29.5 43.8,39.5 40.8,50.7 37.3,54.1"/><polyline class="far-l" points="54.7,29.5 63.7,37.5 70.7,47.8 75.7,51.3"/></g><line class="ln scape" x1="21.6" y1="23.3" x2="8.1" y2="12.8"/><line class="ln thin" x1="8.1" y1="12.8" x2="-4.4" y2="16.3"/><circle class="joint" cx="8.1" cy="12.8" r="1.1"/><ellipse class="hl" cx="76.3" cy="27.0" rx="10.3" ry="9.0"/><polyline class="ln" points="85.7,28.5 92.2,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 35.0 29.5 L 35.0 25.0 Q 38.2 19.0 42.6 20.6 Q 45.4 24.7 47.6 23.7 Q 51.4 21.9 55.0 24.9 L 55.0 30.5 Q 44.0 33.9 35.0 29.5 Z"/><ellipse class="ln" cx="26.1" cy="27.0" rx="7.4" ry="6.6"/><ellipse class="eye" cx="27.0" cy="25.3" rx="3.8" ry="4.8"/><path class="ln" d="M 20.2 26.5 Q 13.4 28.7 11.2 32.9 Q 16.4 29.7 20.2 31.5 Z"/><line class="ln hair" x1="16.4" y1="30.2" x2="15.8" y2="32.6"/><line class="ln hair" x1="14.2" y1="30.9" x2="13.6" y2="33.3"/><polyline class="ln thin" points="38.5,31.0 26.5,38.0 19.5,49.0 15.5,53.0"/><polyline class="ln thin" points="44.6,31.0 41.6,41.0 38.6,54.0 35.1,58.0"/><polyline class="ln thin" points="52.5,31.0 61.5,39.0 68.5,51.0 73.5,55.0"/></svg><figcaption class="mm">~12 mm</figcaption></figure><div class="rank">16</div></div>
+      <div>
+        <h3>Jack jumper ant <span class="sci">Myrmecia pilosula</span></h3>
+        <div class="tags"><span>SE Australia · Tasmania</span></div>
+        <p>Medically the deadliest ant in the world. It causes over 90% of Australian ant-venom allergy, around 3% of Tasmanians are sensitized, and four deaths were confirmed between 1980 and 1999. Hunts by sight and hops at threats.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a17">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-10.2 9 107.9 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="42.7,29.5 30.7,36.5 23.7,46.0 19.7,49.4"/><polyline class="far-l" points="47.8,29.5 44.8,39.5 41.8,50.7 38.3,54.1"/><polyline class="far-l" points="54.7,29.5 63.7,37.5 70.7,47.8 75.7,51.3"/></g><line class="ln scape" x1="21.8" y1="22.9" x2="8.3" y2="12.4"/><line class="ln thin" x1="8.3" y1="12.4" x2="-4.2" y2="15.9"/><circle class="joint" cx="8.3" cy="12.4" r="1.1"/><ellipse class="hl" cx="76.3" cy="27.0" rx="10.3" ry="9.0"/><polyline class="ln" points="85.7,28.5 92.2,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 37.0 29.5 L 37.0 25.0 Q 39.9 19.0 43.8 20.6 Q 46.4 24.7 48.3 23.7 Q 51.8 21.9 55.0 24.9 L 55.0 30.5 Q 45.1 33.9 37.0 29.5 Z"/><ellipse class="ln" cx="27.0" cy="27.0" rx="8.5" ry="7.4"/><ellipse class="eye" cx="28.0" cy="25.1" rx="1.8" ry="2.2"/><path class="ln" d="M 19.9 25.2 Q 14.0 24.3 12.9 28.4 Q 16.8 29.0 19.9 28.6 Z"/><path class="ln" d="M 19.9 33.6 Q 14.0 34.4 12.9 30.4 Q 16.8 29.8 19.9 30.2 Z"/><polyline class="ln thin" points="40.5,31.0 28.5,38.0 21.5,49.0 17.5,53.0"/><polyline class="ln thin" points="45.6,31.0 42.6,41.0 39.6,54.0 36.1,58.0"/><polyline class="ln thin" points="52.5,31.0 61.5,39.0 68.5,51.0 73.5,55.0"/></svg><figcaption class="mm">5–10 mm</figcaption></figure><div class="rank">17</div></div>
+      <div>
+        <h3>Harvester ant <span class="sci">Pogonomyrmex spp.</span></h3>
+        <div class="tags"><span>North &amp; South America</span></div>
+        <p><span class="sci">P. maricopa</span> holds the most toxic insect venom ever measured by weight — an LD50 of 0.12 mg/kg, roughly twenty times honeybee and thirty-five times diamondback rattlesnake. Schmidt 3.0, four to eight hours of pain. Also, incidentally, the ant in every ant farm.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a18">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-13.2 9 112.7 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="39.7,30.0 27.7,37.0 20.7,46.5 16.7,49.9"/><polyline class="far-l" points="46.3,30.0 43.3,40.0 40.3,51.2 36.8,54.6"/><polyline class="far-l" points="54.7,30.0 63.7,38.0 70.7,48.3 75.7,51.8"/></g><line class="ln scape" x1="18.8" y1="22.9" x2="5.3" y2="12.4"/><line class="ln thin" x1="5.3" y1="12.4" x2="-7.2" y2="15.9"/><circle class="joint" cx="5.3" cy="12.4" r="1.1"/><ellipse class="ln" cx="77.3" cy="27.0" rx="11.3" ry="9.5"/><polyline class="ln" points="87.6,28.5 94.1,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 34.0 29.5 L 34.0 24.8 Q 37.4 18.5 42.0 20.1 Q 44.9 24.2 47.2 23.2 Q 51.2 21.4 55.0 24.4 L 55.0 31.0 Q 43.5 34.4 34.0 29.5 Z"/><ellipse class="ln" cx="24.0" cy="27.0" rx="8.5" ry="7.4"/><ellipse class="eye" cx="25.0" cy="25.1" rx="4.0" ry="5.0"/><path class="ln" d="M 16.9 26.8 Q 7.9 29.0 4.9 34.4 Q 11.9 30.0 16.9 31.8 Z"/><line class="ln hair" x1="11.9" y1="30.9" x2="11.3" y2="33.3"/><line class="ln hair" x1="9.0" y1="31.7" x2="8.4" y2="34.1"/><polyline class="ln thin" points="37.5,31.5 25.5,38.5 18.5,49.5 14.5,53.5"/><polyline class="ln thin" points="44.1,31.5 41.1,41.5 38.1,54.5 34.6,58.5"/><polyline class="ln thin" points="52.5,31.5 61.5,39.5 68.5,51.5 73.5,55.5"/></svg><figcaption class="mm">~25 mm</figcaption></figure><div class="rank">18</div></div>
+      <div>
+        <h3>Bull ant <span class="sci">Myrmecia gulosa</span></h3>
+        <div class="tags"><span>E. Australia</span><span class="star">★ Wildcard</span></div>
+        <p>The genus type species, collected by Joseph Banks at Botany Bay in 1770 and named in 1775 — among the first Australian insects ever formally described, the specimen still held in London. 25mm, sharp-eyed, Schmidt around 3. This is the ant Western science met first.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a19">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-1.3 9 95.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="45.7,28.0 33.7,35.0 26.7,44.5 22.7,47.9"/><polyline class="far-l" points="49.4,28.0 46.4,38.0 43.4,49.2 39.9,52.6"/><polyline class="far-l" points="54.7,28.0 63.7,36.0 70.7,46.3 75.7,49.8"/></g><line class="ln scape" x1="30.7" y1="24.4" x2="17.2" y2="13.9"/><line class="ln thin" x1="17.2" y1="13.9" x2="4.7" y2="17.4"/><circle class="joint" cx="17.2" cy="13.9" r="1.1"/><ellipse class="hl" cx="74.5" cy="27.0" rx="8.5" ry="7.0"/><polyline class="ln" points="81.9,28.5 88.4,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 40.0 29.5 L 40.0 25.6 Q 42.4 20.5 45.7 22.1 Q 47.8 26.2 49.5 25.2 Q 52.3 23.4 55.0 26.4 L 55.0 29.0 Q 46.8 32.4 40.0 29.5 Z"/><polyline class="hl" points="51.5,23.5 54.0,15.5 55.1,23.2"/><polyline class="hl" points="55.6,22.6 57.0,17.5 58.4,22.6"/><ellipse class="ln" cx="33.7" cy="27.0" rx="4.8" ry="4.6"/><ellipse class="eye" cx="34.2" cy="25.8" rx="1.2" ry="1.5"/><path class="ln" d="M 30.3 25.9 Q 27.3 28.1 26.3 30.1 Q 28.6 29.1 30.3 30.9 Z"/><polyline class="ln thin" points="43.5,29.5 31.5,36.5 24.5,47.5 20.5,51.5"/><polyline class="ln thin" points="47.2,29.5 44.2,39.5 41.2,52.5 37.7,56.5"/><polyline class="ln thin" points="52.5,29.5 61.5,37.5 68.5,49.5 73.5,53.5"/></svg><figcaption class="mm">1.5 mm</figcaption></figure><div class="rank">19</div></div>
+      <div>
+        <h3>Little fire ant <span class="sci">Wasmannia auropunctata</span></h3>
+        <div class="tags"><span>Neotropics → global</span></div>
+        <p>A millimetre and a half long, and one of the worst invasive species on Earth. Repeated stings to the eyes cause corneal clouding and blindness in pets, livestock and wildlife. Some populations reproduce clonally, which is exactly as difficult to stop as it sounds.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a20">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-10.1 9 109.7 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.5 31.7,36.5 24.7,46.0 20.7,49.4"/><polyline class="far-l" points="50.3,29.5 47.3,39.5 44.3,50.7 40.8,54.1"/><polyline class="far-l" points="58.7,29.5 67.7,37.5 74.7,47.8 79.7,51.3"/></g><line class="ln scape" x1="21.9" y1="22.5" x2="8.4" y2="12.0"/><line class="ln thin" x1="8.4" y1="12.0" x2="-4.1" y2="15.5"/><circle class="joint" cx="8.4" cy="12.0" r="1.1"/><ellipse class="ln" cx="77.3" cy="27.0" rx="11.3" ry="9.5"/><polyline class="ln" points="87.6,28.5 94.1,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 38.0 29.5 L 38.0 25.0 Q 41.4 19.0 46.0 20.6 Q 48.9 24.7 51.2 23.7 Q 55.2 21.9 59.0 24.9 L 59.0 30.5 Q 47.5 33.9 38.0 29.5 Z"/><ellipse class="ln" cx="27.4" cy="27.0" rx="9.1" ry="8.0"/><ellipse class="eye" cx="28.5" cy="24.9" rx="1.6" ry="2.0"/><path class="hl" d="M 19.8 26.2 Q 8.4 20.2 14.4 28.4 Q 13.2 24.8 19.8 28.6 Z"/><path class="hl" d="M 19.8 33.0 Q 8.4 38.9 14.4 30.8 Q 13.2 34.4 19.8 30.6 Z"/><polyline class="ln thin" points="41.5,31.0 29.5,38.0 22.5,49.0 18.5,53.0"/><polyline class="ln thin" points="48.1,31.0 45.1,41.0 42.1,54.0 38.6,58.0"/><polyline class="ln thin" points="56.5,31.0 65.5,39.0 72.5,51.0 77.5,55.0"/></svg><figcaption class="mm">15–20 mm</figcaption></figure><div class="rank">20</div></div>
+      <div>
+        <h3>Millipede executioner <span class="sci">Plectroctena mandibularis</span></h3>
+        <div class="tags"><span>E. &amp; S. Africa</span><span class="star">★ Wildcard</span></div>
+        <p>A lone 20mm hunter that takes apart armored millipedes many times its mass. Nutcracker jaws slide along the coiled body until they catch between segments, forcing a gap to sting through into the soft tissue. It trades numbers for surgery — colonies rarely exceed fifty.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ B TIER ============ -->
+  <section class="tier">
+    <div class="tier-head">
+      <span class="tier-mark">B</span>
+      <span class="tier-name">One devastating trick</span>
+      <span class="tier-range">21–35</span>
+    </div>
+    <p class="tier-note">Specialists. Each of these holds a record, a weapon, or a tactic nothing else on the list can match — and gives up general-purpose power to keep it.</p>
+
+    <article class="entry" id="a21">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-7.4 9 106.9 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.0 26.9,38.8 17.1,52.0 11.5,56.9"/><polyline class="far-l" points="50.3,29.0 46.1,43.0 41.9,58.7 37.0,63.5"/><polyline class="far-l" points="58.7,29.0 71.3,40.2 81.1,54.6 88.1,59.5"/></g><line class="ln scape" x1="24.6" y1="23.5" x2="11.1" y2="13.0"/><line class="ln thin" x1="11.1" y1="13.0" x2="-1.4" y2="16.5"/><circle class="joint" cx="11.1" cy="13.0" r="1.1"/><ellipse class="ln" cx="77.3" cy="27.0" rx="11.3" ry="9.0"/><polyline class="ln" points="87.6,28.5 94.1,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 38.0 29.5 L 38.0 25.2 Q 41.4 19.5 46.0 21.1 Q 48.9 25.2 51.2 24.2 Q 55.2 22.4 59.0 25.4 L 59.0 30.0 Q 47.5 33.4 38.0 29.5 Z"/><ellipse class="ln" cx="29.1" cy="27.0" rx="7.4" ry="6.3"/><ellipse class="eye" cx="30.0" cy="25.4" rx="4.4" ry="5.5"/><path class="ln" d="M 23.2 26.8 L 11.2 25.8 L 16.6 28.6 Z"/><path class="ln" d="M 23.2 31.2 L 11.2 32.2 L 16.6 29.4 Z"/><polyline class="hl thin" points="41.5,30.5 24.7,40.3 14.9,55.7 9.3,61.3"/><polyline class="hl thin" points="48.1,30.5 43.9,44.5 39.7,62.7 34.8,68.3"/><polyline class="hl thin" points="56.5,30.5 69.1,41.7 78.9,58.5 85.9,64.1"/></svg><figcaption class="mm">up to 20 mm</figcaption></figure><div class="rank">21</div></div>
+      <div>
+        <h3>Indian jumping ant <span class="sci">Harpegnathos saltator</span></h3>
+        <div class="tags"><span>India · Sri Lanka</span></div>
+        <p>A large-eyed ambush hunter that jumps body-lengths onto live prey. When the queen dies, workers duel for weeks; the winner's brain physically remodels and its lifespan jumps from seven months to three years. A flagship species for aging and epigenetics research.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a22">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-3.4 9 99.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="46.7,28.5 34.7,35.5 27.7,45.0 23.7,48.4"/><polyline class="far-l" points="51.8,28.5 48.8,38.5 45.8,49.7 42.3,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="28.6" y1="23.8" x2="15.1" y2="13.3"/><line class="ln thin" x1="15.1" y1="13.3" x2="2.6" y2="16.8"/><circle class="joint" cx="15.1" cy="13.3" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="7.5"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 41.0 29.5 L 41.0 25.4 Q 43.9 20.0 47.8 21.6 Q 50.4 25.7 52.3 24.7 Q 55.8 22.9 59.0 25.9 L 59.0 29.5 Q 49.1 32.9 41.0 29.5 Z"/><ellipse class="ln" cx="32.7" cy="27.0" rx="6.8" ry="5.7"/><ellipse class="eye" cx="33.5" cy="25.5" rx="0.9" ry="1.1"/><path class="hl" d="M 27.3 25.8 L 14.3 28.2 L 16.3 25.4 Z"/><path class="hl" d="M 27.3 31.8 L 14.3 29.4 L 16.3 32.2 Z"/><circle class="hl" cx="13.3" cy="28.8" r="1.8"/><polyline class="ln thin" points="44.5,30.0 32.5,37.0 25.5,48.0 21.5,52.0"/><polyline class="ln thin" points="49.6,30.0 46.6,40.0 43.6,53.0 40.1,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">~5 mm</figcaption></figure><div class="rank">22</div></div>
+      <div>
+        <h3>Dracula snap-jaw ant <span class="sci">Mystrium camillae</span></h3>
+        <div class="tags"><span>SE Asia · New Guinea · Queensland</span></div>
+        <p>The fastest appendage movement ever recorded in any animal: the mandible tips press against each other and release at roughly 90 m/s — over 200 mph — in 23 microseconds. Named for the adults' habit of drinking hemolymph from their own larvae without killing them.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a23">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-5.4 9 99.1 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="44.7,29.0 32.7,36.0 25.7,45.5 21.7,48.9"/><polyline class="far-l" points="50.8,29.0 47.8,39.0 44.8,50.2 41.3,53.6"/><polyline class="far-l" points="58.7,29.0 67.7,37.0 74.7,47.3 79.7,50.8"/></g><line class="ln scape" x1="26.6" y1="23.6" x2="13.1" y2="13.1"/><line class="ln thin" x1="13.1" y1="13.1" x2="0.6" y2="16.6"/><circle class="joint" cx="13.1" cy="13.1" r="1.1"/><ellipse class="hl" cx="76.3" cy="27.0" rx="10.3" ry="8.5"/><circle class="ln" cx="87.9" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 39.0 29.5 L 39.0 25.2 Q 42.2 19.5 46.6 21.1 Q 49.4 25.2 51.6 24.2 Q 55.4 22.4 59.0 25.4 L 59.0 30.0 Q 48.0 33.4 39.0 29.5 Z"/><ellipse class="ln" cx="30.7" cy="27.0" rx="6.8" ry="6.0"/><ellipse class="eye" cx="31.5" cy="25.4" rx="2.0" ry="2.5"/><path class="ln" d="M 25.3 26.3 Q 20.8 28.5 19.3 31.4 Q 22.8 29.5 25.3 31.3 Z"/><line class="ln hair" x1="22.8" y1="29.7" x2="22.2" y2="32.1"/><line class="ln hair" x1="21.4" y1="30.1" x2="20.8" y2="32.5"/><polyline class="ln thin" points="42.5,30.5 30.5,37.5 23.5,48.5 19.5,52.5"/><polyline class="ln thin" points="48.6,30.5 45.6,40.5 42.6,53.5 39.1,57.5"/><polyline class="ln thin" points="56.5,30.5 65.5,38.5 72.5,50.5 77.5,54.5"/></svg><figcaption class="mm">4.5–9 mm</figcaption></figure><div class="rank">23</div></div>
+      <div>
+        <h3>Red wood ant <span class="sci">Formica rufa</span></h3>
+        <div class="tags"><span>European forests</span></div>
+        <p>Mounds of 100,000 to 400,000, linked into networks spanning whole forests. No sting — instead a jet of formic acid up to 60% concentration, fired 30cm, capable of hitting several attackers at once. Legally protected in parts of Europe, which few ants can claim.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a24">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-13.0 9 110.4 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="41.7,30.5 29.7,37.5 22.7,47.0 18.7,50.4"/><polyline class="far-l" points="49.2,30.5 46.2,40.5 43.2,51.7 39.7,55.1"/><polyline class="far-l" points="58.7,30.5 67.7,38.5 74.7,48.8 79.7,52.3"/></g><line class="ln scape" x1="19.0" y1="22.5" x2="5.5" y2="12.0"/><line class="ln thin" x1="5.5" y1="12.0" x2="-7.0" y2="15.5"/><circle class="joint" cx="5.5" cy="12.0" r="1.1"/><ellipse class="ln" cx="78.2" cy="27.0" rx="12.2" ry="10.0"/><circle class="ln" cx="91.6" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 36.0 29.5 L 36.0 24.7 Q 39.7 16.0 44.7 18.9 Q 48.0 23.7 50.5 22.7 Q 54.9 20.9 59.0 23.9 L 59.0 31.5 Q 46.4 34.9 36.0 29.5 Z"/><ellipse class="ln" cx="24.8" cy="27.0" rx="9.7" ry="8.0"/><path class="ln thin" fill="none" d="M 31.4 22.2 Q 27.9 27.0 31.4 31.8"/><ellipse class="eye" cx="26.0" cy="24.9" rx="2.2" ry="2.8"/><path class="ln" d="M 16.6 25.4 Q 9.8 23.8 8.6 28.6 Q 13.0 29.2 16.6 28.8 Z"/><path class="ln" d="M 16.6 33.8 Q 9.8 35.3 8.6 30.6 Q 13.0 30.0 16.6 30.4 Z"/><polyline class="ln thin" points="39.5,32.0 27.5,39.0 20.5,50.0 16.5,54.0"/><polyline class="ln thin" points="47.0,32.0 44.0,42.0 41.0,55.0 37.5,59.0"/><polyline class="ln thin" points="56.5,32.0 65.5,40.0 72.5,52.0 77.5,56.0"/></svg><figcaption class="mm">up to 17 mm</figcaption></figure><div class="rank">24</div></div>
+      <div>
+        <h3>Carpenter ant <span class="sci">Camponotus pennsylvanicus &amp; herculeanus</span></h3>
+        <div class="tags"><span>N. America · Europe</span></div>
+        <p>13mm majors with wood-carving mandibles and accurate acid spray. <span class="sci">C. herculeanus</span> supercools and survives boreal winters far below freezing inside its galleries. North America's number-one structural pest ant, and routinely mistaken for a termite.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a25">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-2.4 9 98.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="47.7,28.5 35.7,35.5 28.7,45.0 24.7,48.4"/><polyline class="far-l" points="52.4,28.5 49.4,38.5 46.4,49.7 42.9,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="29.6" y1="23.5" x2="16.1" y2="13.0"/><line class="ln thin" x1="16.1" y1="13.0" x2="3.6" y2="16.5"/><circle class="joint" cx="16.1" cy="13.0" r="1.1"/><ellipse class="hl" cx="74.9" cy="27.0" rx="8.9" ry="8.0"/><line class="hl thin" x1="85.4" y1="27.0" x2="89.9" y2="27.0"/><line class="hl thin" x1="82.3" y1="33.7" x2="85.5" y2="36.9"/><line class="hl thin" x1="74.9" y1="36.5" x2="74.9" y2="41.0"/><line class="hl thin" x1="67.6" y1="33.7" x2="64.4" y2="36.9"/><line class="hl thin" x1="64.5" y1="27.0" x2="60.0" y2="27.0"/><line class="hl thin" x1="67.6" y1="20.3" x2="64.4" y2="17.1"/><line class="hl thin" x1="74.9" y1="17.5" x2="74.9" y2="13.0"/><line class="hl thin" x1="82.3" y1="20.3" x2="85.5" y2="17.1"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 42.0 29.5 L 42.0 25.4 Q 44.7 20.0 48.5 21.6 Q 50.8 25.7 52.7 24.7 Q 55.9 22.9 59.0 25.9 L 59.0 29.5 Q 49.6 32.9 42.0 29.5 Z"/><ellipse class="ln" cx="33.7" cy="27.0" rx="6.8" ry="6.3"/><path class="ln" d="M 29.6 21.1 Q 25.5 22.7 25.5 27.0 L 25.5 31.3 Q 25.5 32.9 29.6 32.9 Z"/><ellipse class="eye" cx="34.5" cy="25.4" rx="1.6" ry="2.0"/><path class="ln" d="M 28.3 27.2 Q 24.3 29.4 23.3 31.5 Q 26.3 29.8 28.3 30.8 Z"/><polyline class="ln thin" points="45.5,30.0 33.5,37.0 26.5,48.0 22.5,52.0"/><polyline class="ln thin" points="50.2,30.0 47.2,40.0 44.2,53.0 40.7,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">~6 mm</figcaption></figure><div class="rank">25</div></div>
+      <div>
+        <h3>Exploding ant <span class="sci">Colobopsis explodens</span></h3>
+        <div class="tags"><span>Borneo · Thailand · Brunei</span></div>
+        <p>Autothysis: the worker ruptures its own body wall to smear a toxic, curry-scented yellow secretion over an attacker, and dies doing it. Doorkeeper majors have plug-shaped heads that seal the nest entrance like a cork.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a26">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-6.2 9 102.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="41.7,28.0 29.7,35.0 22.7,44.5 18.7,47.9"/><polyline class="far-l" points="47.3,28.0 44.3,38.0 41.3,49.2 37.8,52.6"/><polyline class="far-l" points="54.7,28.0 63.7,36.0 70.7,46.3 75.7,49.8"/></g><line class="ln scape" x1="25.8" y1="24.3" x2="12.3" y2="13.8"/><line class="ln thin" x1="12.3" y1="13.8" x2="-0.2" y2="17.3"/><circle class="joint" cx="12.3" cy="13.8" r="1.1"/><ellipse class="hl" cx="75.4" cy="27.0" rx="9.4" ry="7.0"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 36.0 29.5 L 36.0 25.6 Q 39.0 20.5 43.2 22.1 Q 45.9 26.2 48.0 25.2 Q 51.6 23.4 55.0 26.4 L 55.0 29.0 Q 44.5 32.4 36.0 29.5 Z"/><ellipse class="ln" cx="29.1" cy="27.0" rx="5.4" ry="4.8"/><ellipse class="eye" cx="29.7" cy="25.7" rx="3.2" ry="4.0"/><path class="ln" d="M 25.2 26.0 Q 21.8 28.2 20.7 30.4 Q 23.3 29.2 25.2 31.0 Z"/><polyline class="ln thin" points="39.5,29.5 27.5,36.5 20.5,47.5 16.5,51.5"/><polyline class="ln thin" points="45.1,29.5 42.1,39.5 39.1,52.5 35.6,56.5"/><polyline class="ln thin" points="52.5,29.5 61.5,37.5 68.5,49.5 73.5,53.5"/></svg><figcaption class="mm">~5 mm</figcaption></figure><div class="rank">26</div></div>
+      <div>
+        <h3>Bullhorn acacia ant <span class="sci">Pseudomyrmex ferruginea</span></h3>
+        <div class="tags"><span>Mexico · Central America</span><span class="star">★ Wildcard</span></div>
+        <p>Janzen's textbook mutualism. A three-millimetre ant keeping a standing army that swarms out to drive off cattle, deer and other browsers thousands of times its mass, and kills competing plants around its host tree. It dies with the acacia.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a27">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-2.7 9 96.6 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="44.7,28.0 32.7,35.0 25.7,44.5 21.7,47.9"/><polyline class="far-l" points="48.9,28.0 45.9,38.0 42.9,49.2 39.4,52.6"/><polyline class="far-l" points="54.7,28.0 63.7,36.0 70.7,46.3 75.7,49.8"/></g><line class="ln scape" x1="29.3" y1="24.4" x2="15.8" y2="13.9"/><line class="ln thin" x1="15.8" y1="13.9" x2="3.3" y2="17.4"/><circle class="joint" cx="15.8" cy="13.9" r="1.1"/><path class="hl" d="M 66.0 28.0 Q 70.2 17.5 82.1 15.5 Q 71.9 32.5 66.0 28.0 Z"/><polyline class="ln" points="81.9,28.5 88.4,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 39.0 29.5 L 39.0 25.6 Q 41.6 20.5 45.1 22.1 Q 47.3 26.2 49.1 25.2 Q 52.1 23.4 55.0 26.4 L 55.0 29.0 Q 46.2 32.4 39.0 29.5 Z"/><polyline class="hl" points="51.5,23.5 54.0,15.5 55.1,23.2"/><polyline class="hl" points="55.6,22.6 57.0,17.5 58.4,22.6"/><ellipse class="ln" cx="32.4" cy="27.0" rx="5.1" ry="4.6"/><ellipse class="eye" cx="33.0" cy="25.8" rx="1.4" ry="1.8"/><path class="ln" d="M 28.7 25.9 Q 25.7 28.1 24.7 30.1 Q 27.1 29.1 28.7 30.9 Z"/><polyline class="ln thin" points="42.5,29.5 30.5,36.5 23.5,47.5 19.5,51.5"/><polyline class="ln thin" points="46.7,29.5 43.7,39.5 40.7,52.5 37.2,56.5"/><polyline class="ln thin" points="52.5,29.5 61.5,37.5 68.5,49.5 73.5,53.5"/></svg><figcaption class="mm">~3 mm</figcaption></figure><div class="rank">27</div></div>
+      <div>
+        <h3>Whistling-thorn acacia ant <span class="sci">Crematogaster mimosae</span></h3>
+        <div class="tags"><span>East African savanna</span></div>
+        <p>Three millimetres, and it repels elephants. Trees that lose their ant garrison suffer five to seven times more catastrophic elephant damage. The wind moving through the emptied thorn galls is what makes the tree whistle.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a28">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-4.5 9 97.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="44.7,28.5 25.5,39.7 14.3,54.8 7.9,60.3"/><polyline class="far-l" points="50.8,28.5 46.0,44.5 41.2,62.4 35.6,67.9"/><polyline class="far-l" points="58.7,28.5 73.1,41.3 84.3,57.8 92.3,63.3"/></g><line class="ln scape" x1="27.5" y1="24.0" x2="14.0" y2="13.5"/><line class="ln thin" x1="14.0" y1="13.5" x2="1.5" y2="17.0"/><circle class="joint" cx="14.0" cy="13.5" r="1.1"/><ellipse class="ln" cx="75.9" cy="27.0" rx="9.9" ry="8.0"/><circle class="ln" cx="86.9" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 39.0 29.5 L 39.0 25.4 Q 42.2 20.0 46.6 21.6 Q 49.4 25.7 51.6 24.7 Q 55.4 22.9 59.0 25.9 L 59.0 29.5 Q 48.0 32.9 39.0 29.5 Z"/><ellipse class="ln" cx="31.2" cy="27.0" rx="6.3" ry="5.4"/><ellipse class="eye" cx="32.0" cy="25.6" rx="2.6" ry="3.2"/><path class="ln" d="M 26.5 26.1 Q 22.0 28.3 20.5 31.3 Q 23.9 29.3 26.5 31.1 Z"/><line class="ln hair" x1="23.9" y1="29.5" x2="23.3" y2="31.9"/><line class="ln hair" x1="22.5" y1="29.9" x2="21.9" y2="32.3"/><polyline class="hl thin" points="42.5,30.0 23.3,41.2 12.1,58.8 5.7,65.2"/><polyline class="hl thin" points="48.6,30.0 43.8,46.0 39.0,66.8 33.4,73.2"/><polyline class="hl thin" points="56.5,30.0 70.9,42.8 82.1,62.0 90.1,68.4"/></svg><figcaption class="mm">~10 mm</figcaption></figure><div class="rank">28</div></div>
+      <div>
+        <h3>Saharan silver ant <span class="sci">Cataglyphis bombycina</span></h3>
+        <div class="tags"><span>Sahara</span></div>
+        <p>The fastest ant recorded — 855 mm/s, about 108 body lengths per second — and one of the most heat-tolerant land animals, foraging above 60°C surface temperature with a critical maximum near 55°C. Silvered hairs reflect the light; navigation is pure celestial compass and step-counting. It survives by outrunning conditions, not by fighting.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a29">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-7.4 9 106.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.0 31.7,36.0 24.7,45.5 20.7,48.9"/><polyline class="far-l" points="50.3,29.0 47.3,39.0 44.3,50.2 40.8,53.6"/><polyline class="far-l" points="58.7,29.0 67.7,37.0 74.7,47.3 79.7,50.8"/></g><line class="ln scape" x1="24.6" y1="23.5" x2="11.1" y2="13.0"/><line class="ln thin" x1="11.1" y1="13.0" x2="-1.4" y2="16.5"/><circle class="joint" cx="11.1" cy="13.0" r="1.1"/><ellipse class="ln" cx="76.8" cy="27.0" rx="10.8" ry="8.5"/><polyline class="ln" points="86.6,28.5 93.1,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="hl" d="M 38.0 29.5 L 38.0 25.2 Q 41.4 19.5 46.0 21.1 Q 48.9 25.2 51.2 24.2 Q 55.2 22.4 59.0 25.4 L 59.0 30.0 Q 47.5 33.4 38.0 29.5 Z"/><ellipse class="ln" cx="29.1" cy="27.0" rx="7.4" ry="6.3"/><ellipse class="eye" cx="30.0" cy="25.4" rx="2.2" ry="2.8"/><path class="ln" d="M 23.2 26.4 Q 17.9 28.6 16.2 31.9 Q 20.2 29.6 23.2 31.4 Z"/><line class="ln hair" x1="20.2" y1="29.9" x2="19.6" y2="32.3"/><line class="ln hair" x1="18.6" y1="30.4" x2="18.0" y2="32.8"/><polyline class="ln thin" points="41.5,30.5 29.5,37.5 22.5,48.5 18.5,52.5"/><polyline class="ln thin" points="48.1,30.5 45.1,40.5 42.1,53.5 38.6,57.5"/><polyline class="ln thin" points="56.5,30.5 65.5,38.5 72.5,50.5 77.5,54.5"/></svg><figcaption class="mm">~12 mm</figcaption></figure><div class="rank">29</div></div>
+      <div>
+        <h3>Queenless ant <span class="sci">Diacamma spp.</span></h3>
+        <div class="tags"><span>S. &amp; SE Asia</span><span class="star">★ Wildcard</span></div>
+        <p>No queen caste has ever existed in this genus. Every worker hatches with a pair of innervated thoracic "gemmae"; the reigning gamergate bites them off her rivals, causing irreversible neural damage that sterilizes them for life. Social control by mutilation rather than chemistry.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a30">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-3.1 9 97.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="45.7,28.0 33.7,35.0 26.7,44.5 22.7,47.9"/><polyline class="far-l" points="49.4,28.0 46.4,38.0 43.4,49.2 39.9,52.6"/><polyline class="far-l" points="54.7,28.0 63.7,36.0 70.7,46.3 75.7,49.8"/></g><line class="ln scape" x1="28.9" y1="24.1" x2="15.4" y2="13.6"/><line class="ln thin" x1="15.4" y1="13.6" x2="2.9" y2="17.1"/><circle class="joint" cx="15.4" cy="13.6" r="1.1"/><ellipse class="ln" cx="74.5" cy="27.0" rx="8.5" ry="6.5"/><polyline class="ln" points="81.9,28.5 88.4,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 40.0 29.5 L 40.0 25.6 Q 42.4 20.5 45.7 22.1 Q 47.8 26.2 49.5 25.2 Q 52.3 23.4 55.0 26.4 L 55.0 29.0 Q 46.8 32.4 40.0 29.5 Z"/><ellipse class="ln" cx="32.5" cy="27.0" rx="6.0" ry="5.1"/><ellipse class="eye" cx="33.2" cy="25.7" rx="1.6" ry="2.0"/><path class="hl blade" d="M 28.0 25.6 Q 20.2 22.6 18.0 30.2"/><path class="hl blade" d="M 28.0 31.6 Q 20.2 34.6 18.0 27.0"/><polyline class="ln thin" points="43.5,29.5 31.5,36.5 24.5,47.5 20.5,51.5"/><polyline class="ln thin" points="47.2,29.5 44.2,39.5 41.2,52.5 37.7,56.5"/><polyline class="ln thin" points="52.5,29.5 61.5,37.5 68.5,49.5 73.5,53.5"/></svg><figcaption class="mm">~2.5 mm male</figcaption></figure><div class="rank">30</div></div>
+      <div>
+        <h3>Gladiator ant <span class="sci">Cardiocondyla spp.</span></h3>
+        <div class="tags"><span>Mediterranean</span><span class="star">★ Wildcard</span></div>
+        <p>Wingless males armed with modified mandibles fight each other to the death inside their own nest, while winged males coexist as a hedge against losing. The only ants with a caste evolved purely for lethal single combat — all of it against their own species.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a31">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-2.5 9 98.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="46.7,28.5 34.7,35.5 27.7,45.0 23.7,48.4"/><polyline class="far-l" points="51.8,28.5 48.8,38.5 45.8,49.7 42.3,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="29.5" y1="23.8" x2="16.0" y2="13.3"/><line class="ln thin" x1="16.0" y1="13.3" x2="3.5" y2="16.8"/><circle class="joint" cx="16.0" cy="13.3" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="8.0"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 41.0 29.5 L 41.0 25.4 Q 43.9 20.0 47.8 21.6 Q 50.4 25.7 52.3 24.7 Q 55.8 22.9 59.0 25.9 L 59.0 29.5 Q 49.1 32.9 41.0 29.5 Z"/><ellipse class="ln" cx="33.2" cy="27.0" rx="6.3" ry="5.7"/><ellipse class="eye" cx="34.0" cy="25.5" rx="2.0" ry="2.5"/><path class="hl blade" d="M 28.5 25.8 Q 19.9 22.2 17.5 30.4"/><path class="hl blade" d="M 28.5 31.8 Q 19.9 35.4 17.5 27.2"/><polyline class="ln thin" points="44.5,30.0 32.5,37.0 25.5,48.0 21.5,52.0"/><polyline class="ln thin" points="49.6,30.0 46.6,40.0 43.6,53.0 40.1,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">~6 mm</figcaption></figure><div class="rank">31</div></div>
+      <div>
+        <h3>Amazon ant <span class="sci">Polyergus rufescens</span></h3>
+        <div class="tags"><span>C. &amp; S. Europe</span></div>
+        <p>Sickle mandibles built for one purpose: stabbing other ants. Queens infiltrate <span class="sci">Formica</span> nests by chemical mimicry, and raids steal pupae that hatch into a captive workforce. Studied since 1810 and cited by Darwin in <em>On the Origin of Species</em>. It cannot feed itself — a colony without captives starves.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a32">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-14.7 9 111.5 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="42.7,29.5 30.7,36.5 23.7,46.0 19.7,49.4"/><polyline class="far-l" points="47.8,29.5 44.8,39.5 41.8,50.7 38.3,54.1"/><polyline class="far-l" points="54.7,29.5 63.7,37.5 70.7,47.8 75.7,51.3"/></g><line class="ln scape" x1="17.3" y1="21.6" x2="3.8" y2="11.1"/><line class="ln thin" x1="3.8" y1="11.1" x2="-8.7" y2="14.6"/><circle class="joint" cx="3.8" cy="11.1" r="1.1"/><ellipse class="ln" cx="75.9" cy="27.0" rx="9.9" ry="8.5"/><polyline class="ln" points="84.7,28.5 91.2,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 37.0 29.5 L 37.0 25.0 Q 39.9 19.0 43.8 20.6 Q 46.4 24.7 48.3 23.7 Q 51.8 21.9 55.0 24.9 L 55.0 30.5 Q 45.1 33.9 37.0 29.5 Z"/><ellipse class="hl" cx="24.1" cy="27.0" rx="11.4" ry="9.7"/><path class="ln thin" fill="none" d="M 31.9 21.2 Q 27.7 27.0 31.9 32.8"/><ellipse class="eye" cx="25.5" cy="24.5" rx="1.6" ry="2.0"/><path class="ln" d="M 14.2 25.9 Q 6.6 23.6 5.2 29.1 Q 10.2 29.7 14.2 29.3 Z"/><path class="ln" d="M 14.2 34.3 Q 6.6 36.6 5.2 31.1 Q 10.2 30.5 14.2 30.9 Z"/><polyline class="ln thin" points="40.5,31.0 28.5,38.0 21.5,49.0 17.5,53.0"/><polyline class="ln thin" points="45.6,31.0 42.6,41.0 39.6,54.0 36.1,58.0"/><polyline class="ln thin" points="52.5,31.0 61.5,39.0 68.5,51.0 73.5,55.0"/></svg><figcaption class="mm">up to 14 mm</figcaption></figure><div class="rank">32</div></div>
+      <div>
+        <h3>Harvester ant <span class="sci">Messor barbarus</span></h3>
+        <div class="tags"><span>Mediterranean · North Africa</span></div>
+        <p>Big-headed majors with seed-crushing jaws, colonies of 100,000, and underground granaries that carry them through drought. Almost certainly the ant of Aesop's grasshopper fable and of Proverbs 6:6; the ants of the Quran's Surah An-Naml belong to the same Old World granivore guild. No ant has been written about longer.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a33">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-1.5 9 99.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="47.7,28.5 35.7,35.5 28.7,45.0 24.7,48.4"/><polyline class="far-l" points="52.4,28.5 49.4,38.5 46.4,49.7 42.9,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="30.5" y1="23.8" x2="17.0" y2="13.3"/><line class="ln thin" x1="17.0" y1="13.3" x2="4.5" y2="16.8"/><circle class="joint" cx="17.0" cy="13.3" r="1.1"/><circle class="hl" cx="78.2" cy="29.0" r="13.0"/><path class="ln thin" d="M 72.4 17.6 A 16.2 16.2 0 0 1 72.8 40.4"/><path class="ln thin" d="M 78.0 16.4 A 16.2 16.2 0 0 1 78.4 41.6"/><path class="ln thin" d="M 83.7 17.6 A 16.2 16.2 0 0 1 84.1 40.4"/><circle class="ln" cx="91.6" cy="31.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 42.0 29.5 L 42.0 25.4 Q 44.7 20.0 48.5 21.6 Q 50.8 25.7 52.7 24.7 Q 55.9 22.9 59.0 25.9 L 59.0 29.5 Q 49.6 32.9 42.0 29.5 Z"/><ellipse class="ln" cx="34.2" cy="27.0" rx="6.3" ry="5.7"/><ellipse class="eye" cx="35.0" cy="25.5" rx="1.8" ry="2.2"/><path class="ln" d="M 29.5 26.2 Q 25.7 28.4 24.5 30.9 Q 27.4 29.4 29.5 31.2 Z"/><polyline class="ln thin" points="45.5,30.0 33.5,37.0 26.5,48.0 22.5,52.0"/><polyline class="ln thin" points="50.2,30.0 47.2,40.0 44.2,53.0 40.7,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">replete to 14 mm</figcaption></figure><div class="rank">33</div></div>
+      <div>
+        <h3>Honeypot ant <span class="sci">Myrmecocystus mexicanus</span></h3>
+        <div class="tags"><span>SW USA · N. Mexico</span></div>
+        <p>Repletes gorge into living storage jars and hang from the nest ceiling, buffering the colony through months of drought. Rival colonies settle disputes by stilt-walking tournaments rather than killing each other. Australia's <span class="sci">Camponotus inflatus</span> fills the same role in Honey Ant Dreaming and in the 1971 Papunya mural that launched the Western Desert art movement.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a34">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-11.2 9 110.7 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="41.7,29.0 29.7,36.0 22.7,45.5 18.7,48.9"/><polyline class="far-l" points="47.3,29.0 44.3,39.0 41.3,50.2 37.8,53.6"/><polyline class="far-l" points="54.7,29.0 63.7,37.0 70.7,47.3 75.7,50.8"/></g><line class="ln scape" x1="20.8" y1="22.9" x2="7.3" y2="12.4"/><line class="ln thin" x1="7.3" y1="12.4" x2="-5.2" y2="15.9"/><circle class="joint" cx="7.3" cy="12.4" r="1.1"/><ellipse class="ln" cx="77.3" cy="27.0" rx="11.3" ry="6.5"/><ellipse class="ln thin" cx="77.3" cy="27.0" rx="7.4" ry="3.9" fill="none"/><polyline class="ln" points="87.6,28.5 94.1,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 36.0 29.5 L 36.0 25.2 Q 39.0 19.5 43.2 21.1 Q 45.9 25.2 48.0 24.2 Q 51.6 22.4 55.0 25.4 L 55.0 30.0 Q 44.5 33.4 36.0 29.5 Z"/><polyline class="hl" points="51.5,22.5 54.0,14.5 55.1,22.2"/><polyline class="hl" points="47.0,22.5 49.5,14.5 50.6,22.2"/><polyline class="hl" points="55.6,22.6 57.0,17.5 58.4,22.6"/><ellipse class="hl" cx="26.0" cy="27.0" rx="8.5" ry="7.4"/><path class="hl" d="M 20.8 20.0 Q 15.7 22.0 15.7 27.0 L 15.7 32.0 Q 15.7 34.0 20.8 34.0 Z"/><ellipse class="eye" cx="27.0" cy="25.1" rx="2.0" ry="2.5"/><path class="ln" d="M 18.9 27.6 Q 14.9 29.8 13.9 31.9 Q 16.9 30.2 18.9 31.2 Z"/><polyline class="ln thin" points="39.5,30.5 27.5,37.5 20.5,48.5 16.5,52.5"/><polyline class="ln thin" points="45.1,30.5 42.1,40.5 39.1,53.5 35.6,57.5"/><polyline class="ln thin" points="52.5,30.5 61.5,38.5 68.5,50.5 73.5,54.5"/></svg><figcaption class="mm">~14 mm</figcaption></figure><div class="rank">34</div></div>
+      <div>
+        <h3>Turtle ant <span class="sci">Cephalotes atratus</span></h3>
+        <div class="tags"><span>Amazonia</span></div>
+        <p>Soldiers have flat disc heads used to cork the nest entrance like a living door. It was the first animal shown to perform directed aerial descent: knocked off a branch forty metres up, it steers backward in freefall to land on its own trunk rather than hit the predator-rich forest floor.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a35">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-3.5 9 96.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="45.7,28.5 33.7,35.5 26.7,45.0 22.7,48.4"/><polyline class="far-l" points="51.3,28.5 48.3,38.5 45.3,49.7 41.8,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="28.5" y1="23.8" x2="15.0" y2="13.3"/><line class="ln thin" x1="15.0" y1="13.3" x2="2.5" y2="16.8"/><circle class="joint" cx="15.0" cy="13.3" r="1.1"/><ellipse class="ln" cx="75.9" cy="27.0" rx="9.9" ry="8.0"/><circle class="ln" cx="86.9" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 40.0 29.5 L 40.0 25.4 Q 43.0 20.0 47.2 21.6 Q 49.9 25.7 52.0 24.7 Q 55.6 22.9 59.0 25.9 L 59.0 29.5 Q 48.5 32.9 40.0 29.5 Z"/><polyline class="hl" points="55.5,23.0 58.0,15.0 59.1,22.7"/><polyline class="hl" points="51.0,23.0 53.5,15.0 54.6,22.7"/><polyline class="hl" points="59.6,22.6 61.0,17.5 62.4,22.6"/><ellipse class="ln" cx="32.2" cy="27.0" rx="6.3" ry="5.7"/><ellipse class="eye" cx="33.0" cy="25.5" rx="2.0" ry="2.5"/><path class="ln" d="M 27.5 26.2 Q 23.7 28.4 22.5 30.9 Q 25.4 29.4 27.5 31.2 Z"/><polyline class="ln thin" points="43.5,30.0 31.5,37.0 24.5,48.0 20.5,52.0"/><polyline class="ln thin" points="49.1,30.0 46.1,40.0 43.1,53.0 39.6,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">~7 mm</figcaption></figure><div class="rank">35</div></div>
+      <div>
+        <h3>Black mountain ant <span class="sci">Polyrhachis dives &amp; vicina</span></h3>
+        <div class="tags"><span>China · E. Asia</span><span class="star">★ Wildcard</span></div>
+        <p>Roughly 3,000 years in Chinese traditional medicine, dried and steeped as black ant wine, sold beside ginseng and cordyceps — "ginseng is king of herbs, but ant is the herb of kings." Spine-studded armor and a hard bite, but no venom worth the name: its defense is entirely passive.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ C TIER ============ -->
+  <section class="tier">
+    <div class="tier-head">
+      <span class="tier-mark">C</span>
+      <span class="tier-name">Famous, useful, or simply unkillable</span>
+      <span class="tier-range">36–50</span>
+    </div>
+    <p class="tier-note">Ants that earn their place on fame, strangeness, or sheer persistence rather than force. The list ends with those that gave up the ability to fight altogether.</p>
+
+    <article class="entry" id="a36">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="2.7 9 87.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="49.7,28.0 37.7,35.0 30.7,44.5 26.7,47.9"/><polyline class="far-l" points="53.4,28.0 50.4,38.0 47.4,49.2 43.9,52.6"/><polyline class="far-l" points="58.7,28.0 67.7,36.0 74.7,46.3 79.7,49.8"/></g><line class="ln scape" x1="34.7" y1="24.4" x2="21.2" y2="13.9"/><line class="ln thin" x1="21.2" y1="13.9" x2="8.7" y2="17.4"/><circle class="joint" cx="21.2" cy="13.9" r="1.1"/><ellipse class="hl" cx="74.5" cy="27.0" rx="8.5" ry="7.0"/><circle class="ln" cx="84.1" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 44.0 29.5 L 44.0 25.6 Q 46.4 20.5 49.7 22.1 Q 51.8 26.2 53.5 25.2 Q 56.3 23.4 59.0 26.4 L 59.0 29.0 Q 50.8 32.4 44.0 29.5 Z"/><ellipse class="ln" cx="37.7" cy="27.0" rx="4.8" ry="4.6"/><ellipse class="eye" cx="38.2" cy="25.8" rx="1.2" ry="1.5"/><path class="ln" d="M 34.3 25.9 Q 31.3 28.1 30.3 30.1 Q 32.6 29.1 34.3 30.9 Z"/><polyline class="ln thin" points="47.5,29.5 35.5,36.5 28.5,47.5 24.5,51.5"/><polyline class="ln thin" points="51.2,29.5 48.2,39.5 45.2,52.5 41.7,56.5"/><polyline class="ln thin" points="56.5,29.5 65.5,37.5 72.5,49.5 77.5,53.5"/></svg><figcaption class="mm">~2 mm</figcaption></figure><div class="rank">36</div></div>
+      <div>
+        <h3>Lemon ant <span class="sci">Myrmelachista schumanni</span></h3>
+        <div class="tags"><span>Western Amazon</span></div>
+        <p>Fights with herbicide. It injects formic acid into any non-host seedling, killing it within 24 hours, clearing monoculture "devil's gardens" of up to 600 trees that Amazonian folklore blamed on a forest spirit. Some gardens are 800 years old. Colonies reach three million workers and 15,000 queens.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a37">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-3.6 9 98.5 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="44.7,28.5 32.7,35.5 25.7,45.0 21.7,48.4"/><polyline class="far-l" points="48.9,28.5 45.9,38.5 42.9,49.7 39.4,53.1"/><polyline class="far-l" points="54.7,28.5 63.7,36.5 70.7,46.8 75.7,50.3"/></g><line class="ln scape" x1="28.4" y1="24.1" x2="14.9" y2="13.6"/><line class="ln thin" x1="14.9" y1="13.6" x2="2.4" y2="17.1"/><circle class="joint" cx="14.9" cy="13.6" r="1.1"/><ellipse class="ln" cx="74.9" cy="27.0" rx="8.9" ry="7.5"/><polyline class="ln" points="82.9,28.5 89.4,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 39.0 29.5 L 39.0 25.4 Q 41.6 20.0 45.1 21.6 Q 47.3 25.7 49.1 24.7 Q 52.1 22.9 55.0 25.9 L 55.0 29.5 Q 46.2 32.9 39.0 29.5 Z"/><ellipse class="ln" cx="31.8" cy="27.0" rx="5.7" ry="5.1"/><ellipse class="eye" cx="32.5" cy="25.7" rx="1.4" ry="1.8"/><path class="ln" d="M 27.6 26.0 Q 23.8 28.2 22.6 30.7 Q 25.5 29.2 27.6 31.0 Z"/><line class="ln hair" x1="25.5" y1="29.3" x2="24.9" y2="31.7"/><line class="ln hair" x1="24.3" y1="29.6" x2="23.7" y2="32.0"/><polyline class="ln thin" points="42.5,30.0 30.5,37.0 23.5,48.0 19.5,52.0"/><polyline class="ln thin" points="46.7,30.0 43.7,40.0 40.7,53.0 37.2,57.0"/><polyline class="ln thin" points="52.5,30.0 61.5,38.0 68.5,50.0 73.5,54.0"/></svg><figcaption class="mm">~3 mm</figcaption></figure><div class="rank">37</div></div>
+      <div>
+        <h3>Pavement ant <span class="sci">Tetramorium immigrans</span></h3>
+        <div class="tags"><span>Europe → North America</span></div>
+        <p>The sidewalk-war ant. Neighboring colonies meet each spring in mass battles that kill thousands and leave the pavement littered with bodies — the most-filmed ant conflict on Earth. The sting is negligible; the spectacle is not.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a38">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-12.4 9 117.6 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="38.7,30.5 26.7,37.5 19.7,47.0 15.7,50.4"/><polyline class="far-l" points="45.8,30.5 42.8,40.5 39.8,51.7 36.3,55.1"/><polyline class="far-l" points="54.7,30.5 63.7,38.5 70.7,48.8 75.7,52.3"/></g><line class="ln scape" x1="19.6" y1="23.2" x2="6.1" y2="12.7"/><line class="ln thin" x1="6.1" y1="12.7" x2="-6.4" y2="16.2"/><circle class="joint" cx="6.1" cy="12.7" r="1.1"/><ellipse class="ln" cx="80.1" cy="27.0" rx="14.1" ry="11.0"/><polyline class="ln" points="93.2,28.5 99.7,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 33.0 29.5 L 33.0 24.7 Q 36.5 16.5 41.4 19.1 Q 44.4 23.7 46.9 22.7 Q 51.0 20.9 55.0 23.9 L 55.0 31.5 Q 42.9 34.9 33.0 29.5 Z"/><path class="hl soft" d="M 36.0 19.5 Q 47.0 3.5 92.2 11.5 Q 53.0 21.5 36.0 19.5 Z"/><ellipse class="ln" cx="24.1" cy="27.0" rx="7.4" ry="6.8"/><ellipse class="eye" cx="25.0" cy="25.2" rx="2.6" ry="3.2"/><path class="ln" d="M 18.2 26.6 Q 13.7 28.8 12.2 31.7 Q 15.7 29.8 18.2 31.6 Z"/><line class="ln hair" x1="15.7" y1="29.9" x2="15.1" y2="32.3"/><line class="ln hair" x1="14.2" y1="30.4" x2="13.6" y2="32.8"/><polyline class="ln thin" points="36.5,32.0 24.5,39.0 17.5,50.0 13.5,54.0"/><polyline class="ln thin" points="43.6,32.0 40.6,42.0 37.6,55.0 34.1,59.0"/><polyline class="ln thin" points="52.5,32.0 61.5,40.0 68.5,52.0 73.5,56.0"/></svg><figcaption class="mm">queen 20–25 mm</figcaption></figure><div class="rank">38</div></div>
+      <div>
+        <h3>Thief ant <span class="sci">Carebara vidua</span></h3>
+        <div class="tags"><span>East &amp; Southern Africa</span><span class="star">★ Wildcard</span></div>
+        <p>The most extreme queen-to-worker size gap in the family: workers under 2mm, queens 20 to 25mm. Colonies live inside termite mound walls, stealing termite brood. The roasted queens are a prized delicacy in Uganda, Zambia, Malawi and Nigeria.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a39">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-0.6 9 92.4 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="47.7,28.5 35.7,35.5 28.7,45.0 24.7,48.4"/><polyline class="far-l" points="52.4,28.5 49.4,38.5 46.4,49.7 42.9,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="31.4" y1="24.1" x2="17.9" y2="13.6"/><line class="ln thin" x1="17.9" y1="13.6" x2="5.4" y2="17.1"/><circle class="joint" cx="17.9" cy="13.6" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="7.5"/><circle class="ln" cx="86.0" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 42.0 29.5 L 42.0 25.4 Q 44.7 20.0 48.5 21.6 Q 50.8 25.7 52.7 24.7 Q 55.9 22.9 59.0 25.9 L 59.0 29.5 Q 49.6 32.9 42.0 29.5 Z"/><ellipse class="ln" cx="34.8" cy="27.0" rx="5.7" ry="5.1"/><ellipse class="eye" cx="35.5" cy="25.7" rx="1.6" ry="2.0"/><path class="ln" d="M 30.6 26.0 Q 26.8 28.2 25.6 30.7 Q 28.5 29.2 30.6 31.0 Z"/><line class="ln hair" x1="28.5" y1="29.3" x2="27.9" y2="31.7"/><line class="ln hair" x1="27.3" y1="29.6" x2="26.7" y2="32.0"/><polyline class="ln thin" points="45.5,30.0 33.5,37.0 26.5,48.0 22.5,52.0"/><polyline class="ln thin" points="50.2,30.0 47.2,40.0 44.2,53.0 40.7,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">3–5 mm</figcaption></figure><div class="rank">39</div></div>
+      <div>
+        <h3>Black garden ant <span class="sci">Lasius niger</span></h3>
+        <div class="tags"><span>All of Europe</span></div>
+        <p>The default ant of European life and of the formicarium hobby, and the species behind synchronized "flying ant day." An aphid rancher with no real sting. It is here on sheer familiarity — and it is being displaced across the Mediterranean by invaders further up this list.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a40">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-1.2 9 91.1 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="46.7,28.5 39.0,33.0 34.5,39.0 32.0,41.2"/><polyline class="far-l" points="49.9,28.5 48.0,34.9 46.1,42.1 43.8,44.3"/><polyline class="far-l" points="54.7,28.5 60.5,33.6 64.9,40.2 68.1,42.4"/></g><line class="ln scape" x1="30.8" y1="24.1" x2="17.3" y2="13.6"/><line class="ln thin" x1="17.3" y1="13.6" x2="4.8" y2="17.1"/><circle class="joint" cx="17.3" cy="13.6" r="1.1"/><ellipse class="ln" cx="74.5" cy="27.0" rx="8.5" ry="7.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 41.0 29.5 L 41.0 25.4 Q 43.2 20.0 46.3 21.6 Q 48.3 25.7 49.8 24.7 Q 52.5 22.9 55.0 25.9 L 55.0 29.5 Q 47.3 32.9 41.0 29.5 Z"/><ellipse class="ln" cx="34.1" cy="27.0" rx="5.4" ry="5.1"/><path class="ln" d="M 30.2 26.0 Q 27.2 28.2 26.2 30.3 Q 28.5 29.2 30.2 31.0 Z"/><polyline class="hl thin" points="44.5,30.0 36.8,34.5 32.3,41.5 29.8,44.1"/><polyline class="hl thin" points="47.7,30.0 45.8,36.4 43.9,44.7 41.6,47.3"/><polyline class="hl thin" points="52.5,30.0 58.3,35.1 62.7,42.8 65.9,45.4"/></svg><figcaption class="mm">~2 mm</figcaption></figure><div class="rank">40</div></div>
+      <div>
+        <h3>Armored scale-farmer <span class="sci">Melissotarsus emeryi</span></h3>
+        <div class="tags"><span>Africa · Madagascar</span><span class="star">★ Wildcard</span></div>
+        <p>Blind 2mm workers whose legs are so specialized for tunneling through living wood that they cannot walk on a flat surface — they never leave the tree. Possibly the only animal besides humans that farms livestock purely for meat: armored scale insects, no honeydew involved. Its defense is total enclosure.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a41">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-7.4 9 102.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.5 31.7,36.5 24.7,46.0 20.7,49.4"/><polyline class="far-l" points="50.3,29.5 47.3,39.5 44.3,50.7 40.8,54.1"/><polyline class="far-l" points="58.7,29.5 67.7,37.5 74.7,47.8 79.7,51.3"/></g><line class="ln scape" x1="24.6" y1="23.5" x2="11.1" y2="13.0"/><line class="ln thin" x1="11.1" y1="13.0" x2="-1.4" y2="16.5"/><circle class="joint" cx="11.1" cy="13.0" r="1.1"/><ellipse class="ln" cx="76.8" cy="27.0" rx="10.8" ry="9.0"/><circle class="ln" cx="88.8" cy="29.0" r="1.7"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 38.0 29.5 L 38.0 25.0 Q 41.4 19.0 46.0 20.6 Q 48.9 24.7 51.2 23.7 Q 55.2 21.9 59.0 24.9 L 59.0 30.5 Q 47.5 33.9 38.0 29.5 Z"/><ellipse class="ln" cx="29.1" cy="27.0" rx="7.4" ry="6.3"/><ellipse class="eye" cx="30.0" cy="25.4" rx="2.0" ry="2.5"/><path class="ln" d="M 23.2 26.4 Q 18.7 28.6 17.2 31.5 Q 20.7 29.6 23.2 31.4 Z"/><line class="ln hair" x1="20.7" y1="29.8" x2="20.1" y2="32.2"/><line class="ln hair" x1="19.2" y1="30.2" x2="18.6" y2="32.6"/><path class="hl blade" d="M 29.1 20.7 Q 21.1 5.0 30.1 -4.0"/><ellipse class="hl" cx="30.7" cy="-7.0" rx="3.0" ry="5.2"/><polyline class="ln thin" points="41.5,31.0 29.5,38.0 22.5,49.0 18.5,53.0"/><polyline class="ln thin" points="48.1,31.0 45.1,41.0 42.1,54.0 38.6,58.0"/><polyline class="ln thin" points="56.5,31.0 65.5,39.0 72.5,51.0 77.5,55.0"/></svg><figcaption class="mm">~10 mm</figcaption></figure><div class="rank">41</div></div>
+      <div>
+        <h3>Zombie ant <span class="sci">Camponotus rufipes</span></h3>
+        <div class="tags"><span>Brazilian Atlantic Forest</span></div>
+        <p>Host to <span class="sci">Ophiocordyceps</span>, the fungus that drives an infected forager to climb, clamp its jaws into a leaf vein at a precise height and orientation, and die there as a stalk erupts through its head to rain spores on the trails below. The colony's only defense is smelling the infected early and dragging them away.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a42">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-1.3 9 95.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="45.7,28.0 33.7,35.0 26.7,44.5 22.7,47.9"/><polyline class="far-l" points="49.4,28.0 46.4,38.0 43.4,49.2 39.9,52.6"/><polyline class="far-l" points="54.7,28.0 63.7,36.0 70.7,46.3 75.7,49.8"/></g><line class="ln scape" x1="30.7" y1="24.4" x2="17.2" y2="13.9"/><line class="ln thin" x1="17.2" y1="13.9" x2="4.7" y2="17.4"/><circle class="joint" cx="17.2" cy="13.9" r="1.1"/><ellipse class="ln" cx="74.5" cy="27.0" rx="8.5" ry="7.0"/><polyline class="ln" points="81.9,28.5 88.4,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 40.0 29.5 L 40.0 25.6 Q 42.4 20.5 45.7 22.1 Q 47.8 26.2 49.5 25.2 Q 52.3 23.4 55.0 26.4 L 55.0 29.0 Q 46.8 32.4 40.0 29.5 Z"/><ellipse class="ln" cx="33.7" cy="27.0" rx="4.8" ry="4.6"/><ellipse class="eye" cx="34.2" cy="25.8" rx="1.1" ry="1.4"/><path class="ln" d="M 30.3 25.9 Q 27.3 28.1 26.3 30.1 Q 28.6 29.1 30.3 30.9 Z"/><polyline class="ln thin" points="43.5,29.5 31.5,36.5 24.5,47.5 20.5,51.5"/><polyline class="ln thin" points="47.2,29.5 44.2,39.5 41.2,52.5 37.7,56.5"/><polyline class="ln thin" points="52.5,29.5 61.5,37.5 68.5,49.5 73.5,53.5"/></svg><figcaption class="mm">2 mm</figcaption></figure><div class="rank">42</div></div>
+      <div>
+        <h3>Pharaoh ant <span class="sci">Monomorium pharaonis</span></h3>
+        <div class="tags"><span>Tropical Asia → worldwide, indoors</span></div>
+        <p>Two millimetres, stingless, militarily worthless — and effectively impossible to eradicate. A notorious hospital pest that forages in wounds and IV lines. Spray it and the colony buds into several new ones. It survives on logistics rather than force, which is its own kind of power.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a43">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-6.4 9 105.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="43.7,29.0 34.1,34.6 28.5,42.2 25.3,44.9"/><polyline class="far-l" points="48.4,29.0 46.0,37.0 43.6,45.9 40.8,48.7"/><polyline class="far-l" points="54.7,29.0 61.9,35.4 67.5,43.7 71.5,46.4"/></g><line class="ln scape" x1="25.6" y1="23.8" x2="12.1" y2="13.3"/><line class="ln thin" x1="12.1" y1="13.3" x2="-0.4" y2="16.8"/><circle class="joint" cx="12.1" cy="13.3" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="8.0"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 38.0 29.5 L 38.0 25.2 Q 40.7 19.5 44.5 21.1 Q 46.8 25.2 48.7 24.2 Q 51.9 22.4 55.0 25.4 L 55.0 30.0 Q 45.6 33.4 38.0 29.5 Z"/><ellipse class="ln" cx="29.7" cy="27.0" rx="6.8" ry="5.7"/><ellipse class="eye" cx="30.5" cy="25.5" rx="1.2" ry="1.5"/><path class="ln" d="M 24.3 26.2 Q 20.6 28.4 19.3 30.9 Q 22.2 29.4 24.3 31.2 Z"/><line class="ln hair" x1="22.2" y1="29.5" x2="21.6" y2="31.9"/><line class="ln hair" x1="21.0" y1="29.8" x2="20.4" y2="32.2"/><polyline class="ln thin" points="41.5,30.5 31.9,36.1 26.3,44.9 23.1,48.1"/><polyline class="ln thin" points="46.2,30.5 43.8,38.5 41.4,48.9 38.6,52.1"/><polyline class="ln thin" points="52.5,30.5 59.7,36.9 65.3,46.5 69.3,49.7"/><line class="hair" x1="85.2" y1="27.0" x2="87.6" y2="27.0"/><line class="hair" x1="84.8" y1="29.4" x2="87.1" y2="30.0"/><line class="hair" x1="83.6" y1="31.5" x2="85.7" y2="32.8"/><line class="hair" x1="81.8" y1="33.3" x2="83.4" y2="35.2"/><line class="hair" x1="79.5" y1="34.6" x2="80.5" y2="36.8"/><line class="hair" x1="76.8" y1="35.3" x2="77.1" y2="37.7"/><line class="hair" x1="74.0" y1="35.3" x2="73.7" y2="37.7"/><line class="hair" x1="71.3" y1="34.6" x2="70.3" y2="36.8"/><line class="hair" x1="69.0" y1="33.3" x2="67.4" y2="35.2"/><line class="hair" x1="67.2" y1="31.5" x2="65.1" y2="32.8"/><line class="hair" x1="66.0" y1="29.4" x2="63.7" y2="30.0"/><line class="hair" x1="65.6" y1="27.0" x2="63.2" y2="27.0"/><line class="hair" x1="66.0" y1="24.6" x2="63.7" y2="24.0"/><line class="hair" x1="67.2" y1="22.5" x2="65.1" y2="21.2"/><line class="hair" x1="69.0" y1="20.7" x2="67.4" y2="18.8"/><line class="hair" x1="71.3" y1="19.4" x2="70.3" y2="17.2"/><line class="hair" x1="74.0" y1="18.7" x2="73.7" y2="16.3"/><line class="hair" x1="76.8" y1="18.7" x2="77.1" y2="16.3"/><line class="hair" x1="79.5" y1="19.4" x2="80.5" y2="17.2"/><line class="hair" x1="81.8" y1="20.7" x2="83.4" y2="18.8"/><line class="hair" x1="83.6" y1="22.5" x2="85.7" y2="21.2"/><line class="hair" x1="84.8" y1="24.6" x2="87.1" y2="24.0"/><line class="hair" x1="54.0" y1="27.0" x2="56.4" y2="27.0"/><line class="hair" x1="53.3" y1="29.3" x2="55.5" y2="30.4"/><line class="hair" x1="51.2" y1="31.2" x2="52.7" y2="33.1"/><line class="hair" x1="48.2" y1="32.3" x2="48.7" y2="34.6"/><line class="hair" x1="44.8" y1="32.3" x2="44.3" y2="34.6"/><line class="hair" x1="41.8" y1="31.2" x2="40.3" y2="33.1"/><line class="hair" x1="39.7" y1="29.3" x2="37.5" y2="30.4"/><line class="hair" x1="39.0" y1="27.0" x2="36.6" y2="27.0"/><line class="hair" x1="39.7" y1="24.7" x2="37.5" y2="23.6"/><line class="hair" x1="41.8" y1="22.8" x2="40.3" y2="20.9"/><line class="hair" x1="44.8" y1="21.7" x2="44.3" y2="19.4"/><line class="hair" x1="48.2" y1="21.7" x2="48.7" y2="19.4"/><line class="hair" x1="51.2" y1="22.8" x2="52.7" y2="20.9"/><line class="hair" x1="53.3" y1="24.7" x2="55.5" y2="23.6"/><line class="hair" x1="36.9" y1="27.0" x2="39.3" y2="27.0"/><line class="hair" x1="35.5" y1="30.6" x2="37.5" y2="32.0"/><line class="hair" x1="31.9" y1="32.8" x2="32.6" y2="35.1"/><line class="hair" x1="27.4" y1="32.8" x2="26.7" y2="35.1"/><line class="hair" x1="23.8" y1="30.6" x2="21.9" y2="32.0"/><line class="hair" x1="22.4" y1="27.0" x2="20.0" y2="27.0"/><line class="hair" x1="23.8" y1="23.4" x2="21.9" y2="22.0"/><line class="hair" x1="27.4" y1="21.2" x2="26.7" y2="18.9"/><line class="hair" x1="31.9" y1="21.2" x2="32.6" y2="18.9"/><line class="hair" x1="35.5" y1="23.4" x2="37.5" y2="22.0"/></svg><figcaption class="mm">~6 mm</figcaption></figure><div class="rank">43</div></div>
+      <div>
+        <h3>Dirt ant <span class="sci">Basiceros spp.</span></h3>
+        <div class="tags"><span>Neotropics</span><span class="star">★ Wildcard</span></div>
+        <p>Grows its own ghillie suit: two tiers of specialized hairs bind soil and leaf litter into a living camouflage coat. It moves so slowly it was barely photographed alive for years, and plays dead when found. A 16-million-year-old amber relative shows the trick is ancient. Zero defenses once actually located.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a44">
+      <div class="gutter"><figure class="plate fossil"><svg class="ant fossil" viewBox="-3.4 9 99.2 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="46.7,28.5 34.7,35.5 27.7,45.0 23.7,48.4"/><polyline class="far-l" points="51.8,28.5 48.8,38.5 45.8,49.7 42.3,53.1"/><polyline class="far-l" points="58.7,28.5 67.7,36.5 74.7,46.8 79.7,50.3"/></g><line class="ln scape" x1="28.6" y1="23.6" x2="15.1" y2="13.1"/><line class="ln thin" x1="15.1" y1="13.1" x2="2.6" y2="16.6"/><circle class="joint" cx="15.1" cy="13.1" r="1.1"/><ellipse class="ln" cx="75.4" cy="27.0" rx="9.4" ry="8.0"/><polyline class="ln" points="83.8,28.5 90.3,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 41.0 29.5 L 41.0 25.4 Q 43.9 20.0 47.8 21.6 Q 50.4 25.7 52.3 24.7 Q 55.8 22.9 59.0 25.9 L 59.0 29.5 Q 49.1 32.9 41.0 29.5 Z"/><ellipse class="ln" cx="32.7" cy="27.0" rx="6.8" ry="6.0"/><ellipse class="eye" cx="33.5" cy="25.4" rx="1.4" ry="1.8"/><path class="hl" d="M 27.3 26.5 Q 16.9 27.5 18.7 20.1 Q 21.3 29.3 27.3 28.5 Z"/><path class="hl" d="M 27.3 31.3 Q 16.9 30.3 18.7 20.1 Q 21.3 28.5 27.3 29.3 Z"/><polyline class="hl" points="26.8,22.7 18.8,23.4 26.8,26.4"/><polyline class="ln thin" points="44.5,30.0 32.5,37.0 25.5,48.0 21.5,52.0"/><polyline class="ln thin" points="49.6,30.0 46.6,40.0 43.6,53.0 40.1,57.0"/><polyline class="ln thin" points="56.5,30.0 65.5,38.0 72.5,50.0 77.5,54.0"/></svg><figcaption class="mm">~5 mm · 99 Ma</figcaption></figure><div class="rank">44</div></div>
+      <div>
+        <h3>Hell ant <span class="sci">Linguamyrmex vladi</span></h3>
+        <div class="tags"><span>Myanmar amber, ~99 Ma · extinct</span><span class="star">★ Wildcard</span></div>
+        <p>The strangest weapon ants ever evolved: vertically hinged scythe mandibles that slammed prey upward against a metal-reinforced horn on the head — an impaling trap, named for Vlad the Impaler. No living ant fights in this plane. It ranks here because the lineage lost the only fight that ultimately counts.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a45">
+      <div class="gutter"><figure class="plate fossil"><svg class="ant fossil" viewBox="-14.1 9 119.1 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="39.7,31.5 27.7,38.5 20.7,48.0 16.7,51.4"/><polyline class="far-l" points="48.2,31.5 45.2,41.5 42.2,52.7 38.7,56.1"/><polyline class="far-l" points="58.7,31.5 67.7,39.5 74.7,49.8 79.7,53.3"/></g><line class="ln scape" x1="17.9" y1="22.5" x2="4.4" y2="12.0"/><line class="ln thin" x1="4.4" y1="12.0" x2="-8.1" y2="15.5"/><circle class="joint" cx="4.4" cy="12.0" r="1.1"/><ellipse class="ln" cx="82.0" cy="27.0" rx="16.0" ry="12.0"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 34.0 29.5 L 34.0 24.3 Q 38.0 14.5 43.5 17.8 Q 47.0 22.7 49.8 21.7 Q 54.5 19.9 59.0 22.9 L 59.0 32.5 Q 45.2 35.9 34.0 29.5 Z"/><path class="hl soft" d="M 37.0 18.5 Q 48.0 2.5 96.0 10.5 Q 54.0 20.5 37.0 18.5 Z"/><ellipse class="ln" cx="23.4" cy="27.0" rx="9.1" ry="8.0"/><ellipse class="eye" cx="24.5" cy="24.9" rx="3.0" ry="3.8"/><path class="ln" d="M 15.8 27.0 Q 10.5 29.2 8.8 32.5 Q 12.8 30.2 15.8 32.0 Z"/><line class="ln hair" x1="12.8" y1="30.4" x2="12.2" y2="32.8"/><line class="ln hair" x1="11.1" y1="30.9" x2="10.5" y2="33.3"/><polyline class="ln thin" points="37.5,33.0 25.5,40.0 18.5,51.0 14.5,55.0"/><polyline class="ln thin" points="46.0,33.0 43.0,43.0 40.0,56.0 36.5,60.0"/><polyline class="ln thin" points="56.5,33.0 65.5,41.0 72.5,53.0 77.5,57.0"/></svg><figcaption class="mm">queen 5 cm</figcaption></figure><div class="rank">45</div></div>
+      <div>
+        <h3>Titanomyrma <span class="sci">Titanomyrma spp.</span></h3>
+        <div class="tags"><span>Wyoming &amp; Messel, ~49.5 Ma · extinct</span><span class="star">★ Wildcard</span></div>
+        <p>The largest ants ever found: queens over five centimetres with a hummingbird-sized wingspan, on both sides of the Atlantic — evidence that giant heat-loving ants crossed the Arctic during an Eocene hyperthermal. Known only from winged queens. No workers, no venom data, and no descendants.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a46">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-10.4 9 109.1 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="39.7,29.0 27.7,36.0 20.7,45.5 16.7,48.9"/><polyline class="far-l" points="46.3,29.0 43.3,39.0 40.3,50.2 36.8,53.6"/><polyline class="far-l" points="54.7,29.0 63.7,37.0 70.7,47.3 75.7,50.8"/></g><line class="ln scape" x1="21.6" y1="23.6" x2="8.1" y2="13.1"/><line class="ln thin" x1="8.1" y1="13.1" x2="-4.4" y2="16.6"/><circle class="joint" cx="8.1" cy="13.1" r="1.1"/><ellipse class="ln" cx="76.8" cy="27.0" rx="10.8" ry="8.5"/><polyline class="ln" points="86.6,28.5 93.1,31.5"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 34.0 29.5 L 34.0 25.2 Q 37.4 19.5 42.0 21.1 Q 44.9 25.2 47.2 24.2 Q 51.2 22.4 55.0 25.4 L 55.0 30.0 Q 43.5 33.4 34.0 29.5 Z"/><ellipse class="ln" cx="25.7" cy="27.0" rx="6.8" ry="6.0"/><ellipse class="eye" cx="26.5" cy="25.4" rx="3.6" ry="4.5"/><path class="ln" d="M 20.3 26.3 Q 14.3 28.5 12.3 32.3 Q 17.0 29.5 20.3 31.3 Z"/><line class="ln hair" x1="17.0" y1="29.9" x2="16.4" y2="32.3"/><line class="ln hair" x1="15.0" y1="30.5" x2="14.4" y2="32.9"/><polyline class="ln thin" points="37.5,30.5 25.5,37.5 18.5,48.5 14.5,52.5"/><polyline class="ln thin" points="44.1,30.5 41.1,40.5 38.1,53.5 34.6,57.5"/><polyline class="ln thin" points="52.5,30.5 61.5,38.5 68.5,50.5 73.5,54.5"/></svg><figcaption class="mm">~12 mm</figcaption></figure><div class="rank">46</div></div>
+      <div>
+        <h3>Dinosaur ant <span class="sci">Nothomyrmecia macrops</span></h3>
+        <div class="tags"><span>Poochera, South Australia</span></div>
+        <p>The most primitive living ant, lost after 1934 and famously rediscovered in 1977 — the Holy Grail of myrmecology, and now a small town's tourist attraction. It forages alone at near-freezing temperatures that shut down every competitor. Colonies of about a hundred, no trail pheromones, no real defenses.</p>
+      </div>
+    </article>
+
+    <article class="entry" id="a47">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-0.2 9 95.0 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="47.7,28.0 35.7,35.0 28.7,44.5 24.7,47.9"/><polyline class="far-l" points="52.4,28.0 49.4,38.0 46.4,49.2 42.9,52.6"/><polyline class="far-l" points="58.7,28.0 67.7,36.0 74.7,46.3 79.7,49.8"/></g><line class="ln scape" x1="31.8" y1="24.4" x2="18.3" y2="13.9"/><line class="ln thin" x1="18.3" y1="13.9" x2="5.8" y2="17.4"/><circle class="joint" cx="18.3" cy="13.9" r="1.1"/><ellipse class="ln" cx="74.9" cy="27.0" rx="8.9" ry="7.0"/><polyline class="ln" points="82.9,28.5 89.4,31.5"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 42.0 29.5 L 42.0 25.6 Q 44.7 20.5 48.5 22.1 Q 50.8 26.2 52.7 25.2 Q 55.9 23.4 59.0 26.4 L 59.0 29.0 Q 49.6 32.4 42.0 29.5 Z"/><ellipse class="ln" cx="35.1" cy="27.0" rx="5.4" ry="4.6"/><path class="hl" d="M 31.2 26.3 L 21.2 25.3 L 25.7 28.1 Z"/><path class="hl" d="M 31.2 30.7 L 21.2 31.7 L 25.7 28.9 Z"/><polyline class="ln thin" points="45.5,29.5 33.5,36.5 26.5,47.5 22.5,51.5"/><polyline class="ln thin" points="50.2,29.5 47.2,39.5 44.2,52.5 40.7,56.5"/><polyline class="ln thin" points="56.5,29.5 65.5,37.5 72.5,49.5 77.5,53.5"/></svg><figcaption class="mm">2–3 mm</figcaption></figure><div class="rank">47</div></div>
+      <div>
+        <h3>Ant from Mars <span class="sci">Martialis heureka</span></h3>
+        <div class="tags"><span>Amazon soil, near Manaus</span></div>
+        <p>The first new living ant subfamily described since 1923, and a relict of a lineage roughly 120 million years old. Blind, pale, two to three millimetres, subterranean, with forceps jaws for soft prey. Extraordinary evolutionary standing; no combat capability whatsoever.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a48">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="2.3 9 87.6 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="49.7,28.0 37.7,35.0 30.7,44.5 26.7,47.9"/><polyline class="far-l" points="53.4,28.0 50.4,38.0 47.4,49.2 43.9,52.6"/><polyline class="far-l" points="58.7,28.0 67.7,36.0 74.7,46.3 79.7,49.8"/></g><line class="ln scape" x1="34.3" y1="24.4" x2="20.8" y2="13.9"/><line class="ln thin" x1="20.8" y1="13.9" x2="8.3" y2="17.4"/><circle class="joint" cx="20.8" cy="13.9" r="1.1"/><ellipse class="ln" cx="74.5" cy="27.0" rx="8.5" ry="7.0"/><path class="ln" d="M 59.0 29.5 L 60.2 21.5 L 63.6 21.5 L 65.4 29.5 Z"/><path class="ln" d="M 44.0 29.5 L 44.0 25.6 Q 46.4 20.5 49.7 22.1 Q 51.8 26.2 53.5 25.2 Q 56.3 23.4 59.0 26.4 L 59.0 29.0 Q 50.8 32.4 44.0 29.5 Z"/><ellipse class="ln" cx="37.4" cy="27.0" rx="5.1" ry="4.6"/><ellipse class="eye" cx="38.0" cy="25.8" rx="1.4" ry="1.8"/><path class="ln" d="M 33.7 25.9 Q 30.7 28.1 29.7 30.1 Q 32.1 29.1 33.7 30.9 Z"/><polyline class="ln thin" points="47.5,29.5 35.5,36.5 28.5,47.5 24.5,51.5"/><polyline class="ln thin" points="51.2,29.5 48.2,39.5 45.2,52.5 41.7,56.5"/><polyline class="ln thin" points="56.5,29.5 65.5,37.5 72.5,49.5 77.5,53.5"/></svg><figcaption class="mm">~2.5 mm</figcaption></figure><div class="rank">48</div></div>
+      <div>
+        <h3>Assassin ant <span class="sci">Bothriomyrmex decapitans</span></h3>
+        <div class="tags"><span>North Africa · Mediterranean</span><span class="star">★ Wildcard</span></div>
+        <p>Wins colonies by regicide. A lone queen infiltrates a <span class="sci">Tapinoma</span> nest, climbs onto the host queen's back, and saws her head off over several hours while wearing her scent, then inherits the workforce. Defenseless in open combat; one detection and the strategy fails completely.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a49">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-10.4 9 107.9 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="39.7,30.0 27.7,37.0 20.7,46.5 16.7,49.9"/><polyline class="far-l" points="46.3,30.0 43.3,40.0 40.3,51.2 36.8,54.6"/><polyline class="far-l" points="54.7,30.0 63.7,38.0 70.7,48.3 75.7,51.8"/></g><line class="ln scape" x1="21.6" y1="23.6" x2="8.1" y2="13.1"/><line class="ln thin" x1="8.1" y1="13.1" x2="-4.4" y2="16.6"/><circle class="joint" cx="8.1" cy="13.1" r="1.1"/><ellipse class="ln" cx="78.2" cy="27.0" rx="12.2" ry="10.0"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 34.0 29.5 L 34.0 24.8 Q 37.4 17.0 42.0 19.6 Q 44.9 24.2 47.2 23.2 Q 51.2 21.4 55.0 24.4 L 55.0 31.0 Q 43.5 34.4 34.0 29.5 Z"/><path class="hl soft" d="M 37.0 20.0 Q 48.0 4.0 88.4 12.0 Q 54.0 22.0 37.0 20.0 Z"/><ellipse class="ln" cx="25.7" cy="27.0" rx="6.8" ry="6.0"/><ellipse class="eye" cx="26.5" cy="25.4" rx="2.6" ry="3.2"/><path class="ln" d="M 20.3 26.3 Q 16.9 28.5 15.8 30.8 Q 18.4 29.5 20.3 31.3 Z"/><polyline class="ln thin" points="37.5,31.5 25.5,38.5 18.5,49.5 14.5,53.5"/><polyline class="ln thin" points="44.1,31.5 41.1,41.5 38.1,54.5 34.6,58.5"/><polyline class="ln thin" points="52.5,31.5 61.5,39.5 68.5,51.5 73.5,55.5"/></svg><figcaption class="mm">queen ~10 mm</figcaption></figure><div class="rank">49</div></div>
+      <div>
+        <h3>Leafcutter inquiline <span class="sci">Pseudoatta argentina</span></h3>
+        <div class="tags"><span>Argentina</span><span class="star">★ Wildcard</span></div>
+        <p>Has lost its worker caste entirely — only queens and males, living permanently inside <span class="sci">Acromyrmex</span> leafcutter nests, deceiving the hosts into raising their brood. Smooth, reduced, degenerate. It cannot survive an hour outside a host colony.</p>
+      </div>
+    </article>
+
+    <article class="entry wild" id="a50">
+      <div class="gutter"><figure class="plate"><svg class="ant" viewBox="-1.7 9 97.3 51" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g class="far"><polyline class="far-l" points="45.7,28.0 33.7,35.0 26.7,44.5 22.7,47.9"/><polyline class="far-l" points="49.4,28.0 46.4,38.0 43.4,49.2 39.9,52.6"/><polyline class="far-l" points="54.7,28.0 63.7,36.0 70.7,46.3 75.7,49.8"/></g><line class="ln scape" x1="30.3" y1="24.4" x2="16.8" y2="13.9"/><line class="ln thin" x1="16.8" y1="13.9" x2="4.3" y2="17.4"/><circle class="joint" cx="16.8" cy="13.9" r="1.1"/><ellipse class="hl" cx="77.3" cy="29.0" rx="11.3" ry="9.5"/><line class="ln thin" x1="73.3" y1="21.2" x2="73.3" y2="36.8"/><line class="ln thin" x1="78.4" y1="21.2" x2="78.4" y2="36.8"/><line class="ln thin" x1="83.5" y1="21.2" x2="83.5" y2="36.8"/><path class="ln" d="M 55.0 29.5 L 55.8 22.5 L 58.2 22.5 L 59.4 29.5 Z"/><ellipse class="ln" cx="62.6" cy="26.6" rx="2.7" ry="3.4"/><path class="ln" d="M 40.0 29.5 L 40.0 25.6 Q 42.4 20.5 45.7 22.1 Q 47.8 26.2 49.5 25.2 Q 52.3 23.4 55.0 26.4 L 55.0 29.0 Q 46.8 32.4 40.0 29.5 Z"/><ellipse class="ln" cx="33.4" cy="27.0" rx="5.1" ry="4.6"/><ellipse class="eye" cx="34.0" cy="25.8" rx="1.6" ry="2.0"/><path class="ln" d="M 29.7 25.9 Q 27.1 28.1 26.2 29.9 Q 28.3 29.1 29.7 30.9 Z"/><polyline class="ln thin" points="43.5,29.5 31.5,36.5 24.5,47.5 20.5,51.5"/><polyline class="ln thin" points="47.2,29.5 44.2,39.5 41.2,52.5 37.7,56.5"/><polyline class="ln thin" points="52.5,29.5 61.5,37.5 68.5,49.5 73.5,53.5"/></svg><figcaption class="mm">queen ~2.5 mm</figcaption></figure><div class="rank">50</div></div>
+      <div>
+        <h3>Anergates <span class="sci">Anergates atratulus</span></h3>
+        <div class="tags"><span>Europe</span><span class="star">★ Wildcard</span></div>
+        <p>The most complete surrender of autonomy in the family. No workers at all. The males are wingless, larva-like, and never leave the nest. The queen replaces a <span class="sci">Tetramorium</span> queen and the stolen workforce runs everything, forever. Nothing here is further from being able to win a fight — and it never needs to.</p>
+      </div>
+    </article>
+  </section>
+
+  <div class="endnotes">
+    <div class="note">
+      <h4>Wildcards proposed but passed over</h4>
+      <p><em>Polyergus samurai</em> and <em>Formica sanguinea</em> (both redundant with the Amazon ant), <em>Formica talbotae</em>, <em>Myrmoteras</em>, <em>Manica rubida</em>, <em>Rhytidoponera metallica</em>, <em>Polyrhachis ammon</em>, <em>Myrmecia nigrocincta</em>, <em>Pseudomyrmex triplarinus</em>, <em>Cariridris bipetiolata</em>, <em>Desyopone hereon</em>, the Anglesea amber ants, <em>Basiceros enana</em> (folded into the living <em>Basiceros</em> entry), the Myrmidons of Aegina — a myth, not a taxon — and <em>Dasymutilla occidentalis</em>, the "cow killer," which is famous, agonizing, and a wingless wasp rather than an ant.</p>
+    </div>
+    <div class="note">
+      <h4>Incumbents the wildcards displaced</h4>
+      <p><em>Tetraponera aethiops</em>, <em>Azteca</em> (cecropia ants), <em>Formica sanguinea</em>, <em>Liometopum apiculatum</em> (escamoles), <em>Tapinoma sessile</em>, <em>Adetomyrma venatrix</em>, <em>Brachyponera sennaarensis</em>, <em>Paltothyreus tarsatus</em>, <em>Allomerus decemarticulatus</em>, <em>Myrmica rubra</em>, <em>Brachyponera chinensis</em>, <em>Dinomyrmex gigas</em>, and <em>Iridomyrmex purpureus</em> — plus <em>Camponotus inflatus</em> and <em>Monomorium salomonis</em>, folded into the honeypot and harvester entries rather than dropped.</p>
+    </div>
+  </div>
+
+  <p class="colophon">Antarctica is the one continent with no native ants at all</p>
+
+</div>
