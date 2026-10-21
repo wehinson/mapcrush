@@ -437,25 +437,41 @@ async function flushSessionSave(options = {}) {
 }
 
 function mergeCanonicalSession(savedSession, savedActor, sentChangeNumber) {
-  const activeProfile = session.activeProfile;
-  const localProfiles = session.profiles;
-  const canonical = hydrateSession(savedSession);
+  const local = session;
+  const incoming = hydrateSession(savedSession);
+  // A profile save and shared action can complete in either order. Keep the
+  // newest shared snapshot rather than rolling removals back with an older save.
+  const canonical = incoming.sessionRevision >= local.sessionRevision
+    ? incoming
+    : hydrateSession(local);
 
   for (const profileName of ["me", "partner"]) {
     const changedAfterSend = profileName === savedActor
       ? localChangeNumbers[profileName] !== sentChangeNumber
       : dirtyProfiles.has(profileName);
+    const localRevision = local.profileRevisions[profileName];
+    const incomingRevision = incoming.profileRevisions[profileName];
 
-    if (changedAfterSend) {
-      canonical.profiles[profileName] = localProfiles[profileName];
+    canonical.profileRevisions[profileName] = Math.max(localRevision, incomingRevision);
+    canonical.profiles[profileName] = changedAfterSend || localRevision > incomingRevision
+      ? structuredClone(local.profiles[profileName])
+      : incoming.profiles[profileName];
+
+    // Retained edits must never restore a pair cleared by a shared removal.
+    if (canonical.profiles[profileName].currentPair?.some(
+      (id) => canonical.removedCountryIds.includes(id)
+    )) {
+      canonical.profiles[profileName].currentPair = null;
     }
   }
 
-  if (localChangeNumbers[savedActor] === sentChangeNumber) {
+  // Only a profile-save acknowledgment can clear dirty state. Shared actions
+  // acknowledge shared data, even when their snapshot includes this profile.
+  if (savedActor && localChangeNumbers[savedActor] === sentChangeNumber) {
     dirtyProfiles.delete(savedActor);
   }
 
-  canonical.activeProfile = canonical.mode === "partner" ? activeProfile : "me";
+  canonical.activeProfile = canonical.mode === "partner" ? local.activeProfile : "me";
   session = canonical;
 }
 
@@ -564,8 +580,7 @@ async function sendSharedAction(action, message) {
       throw new Error(payload.error || `Shared update failed with ${response.status}`);
     }
 
-    session = hydrateSession(payload.session);
-    session.activeProfile = session.mode === "partner" ? activeProfile : "me";
+    mergeCanonicalSession(payload.session);
     storageWarning = "";
     renderApp(message);
     return true;
